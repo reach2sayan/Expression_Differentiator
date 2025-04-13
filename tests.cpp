@@ -19,7 +19,8 @@ auto manual_add(auto a, auto b) {
 }
 
 TEST(ExpressionTest, SumTest) {
-	auto sum_exp = Sum<int>(1, Sum<int>(2, 3));
+	double a = 1, b = 2, c = 3;
+	auto sum_exp = Sum<int>(a, Sum<int>(b, c));
 	EXPECT_EQ(sum_exp,6);
 }
 

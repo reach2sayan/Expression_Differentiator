@@ -22,25 +22,15 @@ FetchContent_MakeAvailable(googletest)
 FetchContent_MakeAvailable(mdspan)
 FetchContent_MakeAvailable(generator)
 
-add_library(ExpressionSolver SHARED
-        operations.cpp
-        matrix.cpp
-        generators.cpp
-		expressions.hpp)
-
+add_executable(ExpressionSolver src/main.cpp)
 target_include_directories(ExpressionSolver PRIVATE
+        ${CMAKE_SOURCE_DIR}/include
         ${mdspan_SOURCE_DIR}/include
         ${generator_SOURCE_DIR}/include)
 
-add_executable(main main.cpp)
-target_include_directories(main PRIVATE
-	${mdspan_SOURCE_DIR}/include
-	${generator_SOURCE_DIR}/include)
-target_link_libraries(main ExpressionSolver)
-
 add_executable(tests tests.cpp)
 
-target_link_libraries(tests gtest_main ExpressionSolver)
+target_link_libraries(tests gtest_main)
 target_include_directories(tests PRIVATE
         ${CMAKE_SOURCE_DIR}/include
         ${mdspan_SOURCE_DIR}/include

@@ -11,7 +11,6 @@ int main() {
 	matrix<int,4,4> m2(data2);
 	auto target = Sum<matrix<int,4,4>>(m1,m2);
 	auto multarget = Multiply<matrix<int,4,4>>(m1,m2);
-	//auto neg_mult = Negate<matrix<int,4,4>>(multarget);
 	std::cout << multarget.eval() << std::endl;
 	//std::cout << neg_mult << std::endl;
 }

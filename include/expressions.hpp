@@ -12,7 +12,6 @@
 template<typename Op, typename... E>
 class Expression {
 	std::tuple<E...> inner_expressions;
-
 public:
 	using value_type = typename Op::value_type;
 	constexpr Expression(E... e);
@@ -24,6 +23,7 @@ public:
 	}
 	constexpr auto eval() const;
 	constexpr operator value_type() const { return eval(); }
+	constexpr auto derivative(const Expression& e) const;
 };
 
 template<typename Op, typename... E>
@@ -32,6 +32,11 @@ constexpr Expression<Op, E...>::Expression(E... e) : inner_expressions(std::move
 template<typename Op, typename... E>
 constexpr auto Expression<Op, E...>::eval() const {
 	return std::apply([](const auto &...e) { return Op::eval(e...); }, inner_expressions);
+}
+
+template<typename Op, typename... E>
+constexpr auto Expression<Op, E...>::derivative(const Expression& with) const {
+	return std::apply([&with](const auto &...e) { return Op::derivate(with, e...); }, inner_expressions);
 }
 
 
