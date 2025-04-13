@@ -50,7 +50,16 @@ TEST(ExpressionTest, ConstantTest) {
   EXPECT_EQ(target,1);
 }
 
+TEST(ExpressionTest, VariableTest) {
+  auto target = Constant<int>(1);
+  auto derv = target.derivative();
+  EXPECT_EQ(derv,0);
+  EXPECT_EQ(target,1);
+}
+
 TEST(ExpressionTest, DerivativeTest) {
+  Variable x{4};
+  auto expr = Sum<int>(Constant<int>(3), Exp<int,Variable<int>,Constant<int>>(x, Constant(2)));
   auto target = Constant<int>(1);
   auto derv = target.derivative();
   EXPECT_EQ(derv,0);

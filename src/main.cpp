@@ -16,4 +16,15 @@ int main() {
   auto target2 = target.derivative();
   std::cout << target.eval() << std::endl;
   std::cout << target2 << std::endl;
+
+  Variable x{4};
+  auto expr = Sum<int>(Constant<int>(3), Exp<int,Variable<int>,Constant<int>>(x, Constant(2)));
+  std::cout << expr << std::endl;
+  std::cout << expr.eval() << std::endl;
+  auto expr2 = Multiply<int>(Variable<int>(x), Constant<int>(2));
+  std::cout << expr2 << std::endl;
+  std::cout << expr2.eval() << std::endl;
+  std::cout << expr2.derivative() << std::endl;
+  std::cout << expr2.derivative().eval() << std::endl;
+  //auto derv = target.derivative();
 }

@@ -18,16 +18,15 @@ public:
   }
 };
 
-template <typename T> class variable {
+template <typename T> class Variable {
   T value;
-
 public:
-  constexpr variable(T value) : value(value) {}
+  constexpr Variable(T value) : value(value) {}
   constexpr operator T() const { return value; }
   constexpr T eval() const { return value; }
-  constexpr T derivative() const { return Constant{++T{}}; }
-  friend std::ostream& operator<<(std::ostream& out, const variable<T>& c) {
-    return out << c.value;
+  constexpr T derivative() const { auto ret = T{}; return Constant{++ret}; }
+  friend std::ostream& operator<<(std::ostream& out, const Variable<T>& c) {
+    return out << 'v';
   }
 };
 
