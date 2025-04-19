@@ -27,11 +27,6 @@ jobs:
             compiler: mingw
             c_compiler: gcc
             cpp_compiler: g++
-        exclude:
-          - os: windows-latest
-            compiler: gcc
-          - os: windows-latest
-            compiler: clang
 
     steps:
       - uses: actions/checkout@v4
