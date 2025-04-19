@@ -33,9 +33,7 @@ endif ()
 
 set(CMAKE_CXX_FLAGS_OLD ${CMAKE_CXX_FLAGS})
 if(MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W")
-else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -w")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W0")
 endif()
 FetchContent_Declare(
         googletest
