@@ -28,7 +28,6 @@ using as_const_expression = make_constant<
                typename TExpression::rhs_type>>::type;
 
 template <char symbol, typename Expr> struct replace_matching_variable;
-
 template <char symbol, typename T> struct replace_matching_variable {
   using type = T;
 };
