@@ -41,16 +41,28 @@ jobs:
         id: strings
         shell: bash
         run: |
-          echo "build-output-dir=${{ github.workspace }}/build" >> "$GITHUB_OUTPUT"
+          echo "build-output-dir=${GITHUB_WORKSPACE}/build" >> "$GITHUB_OUTPUT"
 
       - name: Setup MSVC Developer Command Prompt
         if: runner.os == 'Windows'
         uses: microsoft/setup-msbuild@v1.0.2
 
       - name: Configure CMake
+        if: runner.os != 'Windows'
         shell: bash
         run: >
           cmake -B ${{ steps.strings.outputs.build-output-dir }}
+          -DCMAKE_CXX_STANDARD=26
+          -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
+          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
+          -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+          -S ${GITHUB_WORKSPACE}
+
+      - name: Configure CMake (Windows)
+        if: runner.os == 'Windows'
+        shell: cmd
+        run: >
+          cmake -B ${{ github.workspace }}\build
           -DCMAKE_CXX_STANDARD=26
           -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }}
           -DCMAKE_C_COMPILER=${{ matrix.c_compiler }}
