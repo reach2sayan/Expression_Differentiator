@@ -5,6 +5,7 @@
 #pragma once
 #include "expressions.hpp"
 #include "values.hpp"
+#include <array>
 
 template <typename T> constexpr static bool is_const = false;
 template <typename T> constexpr static bool is_const<Constant<T>> = true;
