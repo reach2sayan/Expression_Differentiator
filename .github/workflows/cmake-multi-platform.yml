@@ -28,8 +28,6 @@ jobs:
             c_compiler: gcc
             cpp_compiler: g++
         exclude:
-          - os: ubuntu-latest
-            compiler: mingw
           - os: windows-latest
             compiler: gcc
           - os: windows-latest
