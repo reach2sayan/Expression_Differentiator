@@ -1,9 +1,14 @@
-#include <iostream>
+
 #define REMOVE_MATRIX 1
-#include "equation.hpp"
 #if !defined(REMOVE_MATRIX)
 #include "matrix.hpp"
 #endif
+
+
+template<typename T> struct TD;
+
+#include <iostream>
+#include "equation.hpp"
 #include "procvar.hpp"
 #include "traits.hpp"
 #include "values.hpp"
@@ -28,6 +33,9 @@ int main() {
   auto b = PC(3);
   auto oter = PVl(4.0,'o');
   auto tmp = a + b + oter;
+  auto d = extract_symbols_from_expr<decltype(tmp)>::type{};
+  auto k = transform_tuple_chars(d,tmp);
+  TD<decltype(k)> td;
   static_assert(tmp.var_count == 2);
   auto tmp2 = a * b;
   auto tmp3 = a / b;
@@ -45,4 +53,5 @@ int main() {
 
   Equation e(tmp);
   std::cout << (int)e << std::endl;
+
 }

@@ -164,30 +164,57 @@ constexpr auto make_all_constant_except(const MonoExpression<Op, Expr> &expr)
   return make_all_constant_except<symbol>(expr.expressions());
 }
 
-template <size_t I, size_t N>
-constexpr char get_char_at(const std::array<char, N> &arr) {
-  return arr[I];
+template <typename T> struct extract_variable_symbols {
+  using type = std::tuple<>;
+};
+
+template <typename T, char Symbol>
+struct extract_variable_symbols<Variable<T, Symbol>> {
+  using type = std::tuple<std::integral_constant<char, Symbol>>;
+};
+
+template <typename T>
+struct extract_symbols_from_expr {
+  using type = typename extract_variable_symbols<T>::type;
+};
+
+template <typename Op, typename LHS, typename RHS>
+struct extract_symbols_from_expr<Expression<Op, LHS, RHS>> {
+private:
+  using left = typename extract_symbols_from_expr<LHS>::type;
+  using right = typename extract_symbols_from_expr<RHS>::type;
+
+public:
+  using type =
+      decltype(std::tuple_cat(std::declval<left>(), std::declval<right>()));
+};
+
+template <char... Cs>
+struct charlist {};
+
+template <typename Tuple>
+struct tuple_to_charlist;
+
+template <char... Cs>
+struct tuple_to_charlist<std::tuple<std::integral_constant<char, Cs>...>> {
+  using type = charlist<Cs...>;
+};
+
+template <typename Expr>
+struct extract_charlist {
+private:
+  using as_tuple = typename extract_symbols_from_expr<Expr>::type;
+public:
+  using type = typename tuple_to_charlist<as_tuple>::type;
+};
+template <typename Tuple, typename Op, typename LHS, typename RHS, std::size_t... Is>
+constexpr auto transform_tuple_chars_impl(const Tuple& chars, const Expression<Op, LHS, RHS>& expr, std::index_sequence<Is...>) {
+  return std::make_tuple(
+      make_all_constant_except<std::tuple_element_t<Is, Tuple>::value>(expr)...
+  );
 }
 
-template <size_t Index = 0, size_t N>
-constexpr auto to_char_sequence_helper(const std::array<char, N> &arr,
-                                       std::integer_sequence<char>) {
-  return std::integer_sequence<char>{};
-}
-
-// Recursive case
-template <size_t Index = 0, size_t N, char... Cs>
-constexpr auto to_char_sequence_helper(const std::array<char, N> &arr,
-                                       std::integer_sequence<char, Cs...>) {
-  if constexpr (Index >= N) {
-    return std::integer_sequence<char, Cs...>{};
-  } else {
-    return to_char_sequence_helper<Index + 1>(
-        arr, std::integer_sequence<char, Cs..., arr[Index]>{});
-  }
-}
-
-template <size_t N>
-constexpr auto to_char_sequence(const std::array<char, N> &arr) {
-  return to_char_sequence_helper(arr, std::integer_sequence<char>{});
+template <typename... Chars, typename Op, typename LHS, typename RHS>
+constexpr auto transform_tuple_chars(const std::tuple<Chars...>& chars, const Expression<Op, LHS, RHS>& expr) {
+  return transform_tuple_chars_impl(chars, expr, std::index_sequence_for<Chars...>{});
 }

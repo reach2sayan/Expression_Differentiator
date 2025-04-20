@@ -5,29 +5,35 @@
 #pragma once
 #include "traits.hpp"
 
+template <typename TExpression>
+constexpr auto collect_variable_labels(const TExpression &expression) {
+  constexpr std::size_t N = TExpression::var_count;
+  std::array<char, N> result{};
+  std::size_t index = 0;
+  make_labels_array(expression, result, index);
+  return result;
+}
+
+template<typename TExpression>
+constexpr static auto
+make_derivatives(const TExpression &expression) {
+  auto labels = collect_variable_labels(expression);
+  auto label_tuple = std::tuple_cat(labels);
+  return label_tuple;
+}
+
+/*
 template <typename TExpression, typename... TDerivatives> class Derivative {
   std::tuple<TDerivatives...> derivatives;
-
-  template <char... Cs>
-  constexpr static auto
-  make_derivative_tuples_impl(const TExpression &expression,
-                              std::integer_sequence<char, Cs...>) {
-    return std::tuple{make_all_constant_except<Cs>(expression).derivative()...};
-  }
-  template <std::size_t N>
-  constexpr static auto
-  make_derivative_tuples(const TExpression &expression,
-                         const std::array<char, N> &labels) {
-    return make_derivative_tuples_impl(expression, to_char_sequence(labels));
-  }
-
-  constexpr static std::tuple<TDerivatives...>
-  make_derivatives(const TExpression &expression) {
-    auto labels = collect_variable_labels(expression);
-    return make_derivative_tuples(expression, labels);
-  }
 
 public:
   constexpr Derivative(const TExpression &expression)
       : derivatives{make_derivatives(expression)} {}
 };
+
+template <typename TExpression>
+Derivative(TExpression)
+    -> Derivative<std::decay_t<TExpression>,
+                  decltype(TExpression::template make_derivatives(
+                      std::declval<const TExpression&>()))>;
+*/
