@@ -136,7 +136,10 @@ TEST(EquationTest, SetUpBasic) {
   auto arr2 = make_all_constant_except<'y'>(sum_exp);
   auto arr3 = make_all_constant_except<'x'>(sum_exp);
   std::cout << sum_exp << "\n";
+  std::cout << "-----------------\n";
   std::cout << arr2 << "\n";
+  std::cout << arr2.derivative() << "\n";
+  std::cout << "-----------------\n";
   std::cout << arr3 << "\n";
   auto labels = collect_variable_labels(sum_exp); // std::array<char, N>
 }

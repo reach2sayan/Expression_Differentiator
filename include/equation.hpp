@@ -6,9 +6,8 @@
 #include "expressions.hpp"
 #include "operations.hpp"
 #include "traits.hpp"
-#include <ranges>
 #include <array>
-#include <unordered_map>
+#include <type_traits>
 
 template <typename TExpression>
 constexpr auto collect_variable_labels(const TExpression &expression) {
@@ -22,7 +21,7 @@ constexpr auto collect_variable_labels(const TExpression &expression) {
 template <typename Expr, char... Cs>
 constexpr auto construct_derivatives_impl(const Expr &expr,
                                            std::integer_sequence<char, Cs...>) {
-  return std::array{make_all_constant_except<Cs>(expr)...};
+  return std::array{make_all_constant_except<Cs>(expr).derivative()...};
 }
 
 template <typename TExpression>
@@ -36,7 +35,7 @@ public:
   constexpr static size_t var_count = std::decay_t<TExpression>::var_count;
 private:
   TExpression expression;
-  std::array<TExpression, var_count> derivatives;
+  //std::array<TExpression, var_count> derivatives;
 public:
   using value_type = typename TExpression::value_type;
 
@@ -44,7 +43,7 @@ public:
   constexpr const TExpression &get_expression() const { return expression; }
 
   constexpr Equation(const TExpression &e)
-      : expression{e}, derivatives{construct_derivatives(e)} {}
+      : expression{e} /*, derivatives{construct_derivatives(e)}*/ {}
 };
 
 template <typename T> Equation(T &&) -> Equation<std::decay_t<T>>;
