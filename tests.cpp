@@ -127,6 +127,18 @@ TEST(ProcVarTest, FixedToSpecifyValue) {
   ASSERT_EQ(a, 2);
 }
 
+TEST(TrigTest, SinTest) {
+  auto b = sin(PC(0.5));
+  std::cout << b.eval() << std::endl;
+  ASSERT_EQ(b, std::sin(0.5));
+}
+
+TEST(TrigTest, CosTest) {
+  auto b = cos(PC(1.0));
+  ASSERT_EQ(b, std::cos(1.0));
+}
+
+
 TEST(EquationTest, DerivativeStatic) {
   constexpr auto a = 1_ci;
   constexpr Variable<int, 'x'> b{2};

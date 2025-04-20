@@ -43,9 +43,15 @@ struct Operators {
   friend constexpr Expression<DivideOp<typename LHS::value_type>, LHS, RHS>
   operator/(const LHS &a, const RHS &b);
 
-  template <typename Expr> friend constexpr auto sin(const Expr &a);
+  template <typename Expr> friend constexpr MonoExpression<SineOp<typename Expr::value_type>, Expr> sin(const Expr &a) {
+    using value_type = typename Expr::value_type;
+    return Sine<value_type>(a);
+  }
 
-  template <typename Expr> friend constexpr auto cos(const Expr &a);
+  template <typename Expr> friend constexpr MonoExpression<CosineOp<typename Expr::value_type>, Expr> cos(const Expr &a) {
+    using value_type = typename Expr::value_type;
+    return Cosine<value_type>(a);
+  }
 };
 
 template <typename T> class Constant : public Operators {
@@ -120,18 +126,11 @@ constexpr auto operator^(const LHS &a, const RHS &b) {
   return Exp<value_type>(a, b);
 }
 
-template <typename T, typename LHS, typename RHS>
-constexpr auto cos(const LHS &a) {
+template <typename T, typename Expr>
+constexpr auto cos(const Expr &a) {
   // VALUE_TYPE_MISMATCH_ASSERT(LHS, RHS);
-  using value_type = typename LHS::value_type;
+  using value_type = typename Expr::value_type;
   return Cosine<value_type>(a);
-}
-
-template <typename T, typename LHS, typename RHS>
-constexpr auto sin(const LHS &a) {
-  // VALUE_TYPE_MISMATCH_ASSERT(LHS, RHS);
-  using value_type = typename LHS::value_type;
-  return Sine<value_type>(a);
 }
 
 #define PV(x, label) Variable<decltype(x), label>(x)
