@@ -29,13 +29,12 @@ constexpr auto make_derivatives(const std::tuple<Chars...> &chars,
 template <typename TExpression> class Equation {
 private:
   TExpression expression;
-  using symbolslist =
-      typename extract_symbols_from_expr<decltype(expression)>::type;
+  using symbolslist = typename extract_symbols_from_expr<TExpression>::type;
   using derivatives_t =
       decltype(make_derivatives(std::declval<symbolslist>(), expression));
   derivatives_t derivatives;
 
-  constexpr static auto get_derivatives_impl(const TExpression& expr) {
+  constexpr static auto get_derivatives_impl(const TExpression &expr) {
     return make_derivatives(symbolslist{}, expr);
   }
 
@@ -44,8 +43,8 @@ public:
   constexpr operator value_type() const { return expression; }
   constexpr const auto &get_expression() const { return expression; }
   constexpr const auto &get_derivatives() const { return derivatives; }
-
-  constexpr Equation(const TExpression &e) : expression{e}, derivatives{get_derivatives_impl(e)} {}
+  constexpr Equation(const TExpression &e)
+      : expression{e}, derivatives{get_derivatives_impl(e)} {}
 };
 
 template <typename T> Equation(T &&) -> Equation<std::decay_t<T>>;
