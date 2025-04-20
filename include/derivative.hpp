@@ -3,8 +3,11 @@
 //
 
 #pragma once
-#include "traits.hpp"
-
+template <typename> class Derivative {
+  [[deprecated]];
+};
+#define DEPRECATED_DERIVATIVE true
+#if !DEPRECATED_DERIVATIVE
 template <typename TExpression>
 constexpr auto collect_variable_labels(const TExpression &expression) {
   constexpr std::size_t N = TExpression::var_count;
@@ -22,7 +25,6 @@ make_derivatives(const TExpression &expression) {
   return label_tuple;
 }
 
-/*
 template <typename TExpression, typename... TDerivatives> class Derivative {
   std::tuple<TDerivatives...> derivatives;
 
@@ -36,4 +38,5 @@ Derivative(TExpression)
     -> Derivative<std::decay_t<TExpression>,
                   decltype(TExpression::template make_derivatives(
                       std::declval<const TExpression&>()))>;
-*/
+
+#endif

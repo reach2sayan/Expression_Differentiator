@@ -168,13 +168,12 @@ template <typename T> struct extract_variable_symbols {
   using type = std::tuple<>;
 };
 
-template <typename T, char Symbol>
-struct extract_variable_symbols<Variable<T, Symbol>> {
-  using type = std::tuple<std::integral_constant<char, Symbol>>;
+template <typename T, char symbol>
+struct extract_variable_symbols<Variable<T, symbol>> {
+  using type = std::tuple<std::integral_constant<char, symbol>>;
 };
 
-template <typename T>
-struct extract_symbols_from_expr {
+template <typename T> struct extract_symbols_from_expr {
   using type = typename extract_variable_symbols<T>::type;
 };
 
@@ -188,33 +187,3 @@ public:
   using type =
       decltype(std::tuple_cat(std::declval<left>(), std::declval<right>()));
 };
-
-template <char... Cs>
-struct charlist {};
-
-template <typename Tuple>
-struct tuple_to_charlist;
-
-template <char... Cs>
-struct tuple_to_charlist<std::tuple<std::integral_constant<char, Cs>...>> {
-  using type = charlist<Cs...>;
-};
-
-template <typename Expr>
-struct extract_charlist {
-private:
-  using as_tuple = typename extract_symbols_from_expr<Expr>::type;
-public:
-  using type = typename tuple_to_charlist<as_tuple>::type;
-};
-template <typename Tuple, typename Op, typename LHS, typename RHS, std::size_t... Is>
-constexpr auto transform_tuple_chars_impl(const Tuple& chars, const Expression<Op, LHS, RHS>& expr, std::index_sequence<Is...>) {
-  return std::make_tuple(
-      make_all_constant_except<std::tuple_element_t<Is, Tuple>::value>(expr)...
-  );
-}
-
-template <typename... Chars, typename Op, typename LHS, typename RHS>
-constexpr auto transform_tuple_chars(const std::tuple<Chars...>& chars, const Expression<Op, LHS, RHS>& expr) {
-  return transform_tuple_chars_impl(chars, expr, std::index_sequence_for<Chars...>{});
-}
