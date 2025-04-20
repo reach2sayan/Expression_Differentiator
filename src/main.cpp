@@ -13,21 +13,7 @@ template <typename... T> struct TD;
 #include <iostream>
 #include <string>
 
-#if !defined(NDEBUG)
-template <class TupType, size_t... I>
-void print_tup(const TupType &_tup, std::index_sequence<I...>) {
-  std::cout << "(";
-  (..., (std::cout << (I == 0 ? "" : ", ") << std::get<I>(_tup)));
-  std::cout << ")\n";
-}
-
-template <class... T> void print_tup(const std::tuple<T...> &_tup) {
-  print_tup(_tup, std::make_index_sequence<sizeof...(T)>());
-}
 #define PRINT_TUP(tup) print_tup(tup)
-#else
-#define PRINT_TUP(tup)
-#endif
 
 
 
@@ -53,9 +39,9 @@ int main() {
   std::cout << "a + b + oter \n= " << tmp << "\n= " << tmp.eval() << "\n";
   auto d = extract_symbols_from_expr<decltype(tmp)>::type{};
   auto k = make_derivatives(d, tmp);
-  PRINT_TUP(k);
 
   Equation e(tmp);
+  std::cout << e;
   //auto derivs = e.get_derivatives();
   // TD<decltype(k), decltype(d), decltype(tmp)> td;
   /*

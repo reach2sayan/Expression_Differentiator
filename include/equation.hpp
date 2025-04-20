@@ -19,6 +19,20 @@ constexpr auto make_derivatives_impl(const Tuple &chars,
           .derivative()...);
 }
 
+template <class TupType, size_t... I>
+std::ostream &print_tup(std::ostream &out, const TupType &_tup,
+                        std::index_sequence<I...>) {
+  out << "(";
+  (..., (out << (I == 0 ? "" : ", ") << std::get<I>(_tup)));
+  out << ")\n";
+  return out;
+}
+
+template <class... T>
+std::ostream &print_tup(std::ostream &out, const std::tuple<T...> &_tup) {
+  return print_tup(out, _tup, std::make_index_sequence<sizeof...(T)>());
+}
+
 template <typename... Chars, typename Op, typename LHS, typename RHS>
 constexpr auto make_derivatives(const std::tuple<Chars...> &chars,
                                 const Expression<Op, LHS, RHS> &expr) {
@@ -36,6 +50,14 @@ private:
 
   constexpr static auto get_derivatives_impl(const TExpression &expr) {
     return make_derivatives(symbolslist{}, expr);
+  }
+
+  friend std::ostream &operator<<(std::ostream &out, const Equation &e) {
+    out << "Equation\n"
+        << e.get_expression() << "\n"
+        << "Derivatives\n";
+    print_tup(out,e.get_derivatives());
+    return out;
   }
 
 public:

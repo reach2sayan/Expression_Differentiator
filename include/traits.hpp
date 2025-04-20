@@ -187,3 +187,12 @@ public:
   using type =
       decltype(std::tuple_cat(std::declval<left>(), std::declval<right>()));
 };
+
+template <typename Op, typename Expr>
+struct extract_symbols_from_expr<MonoExpression<Op, Expr>> {
+private:
+  using left = typename extract_symbols_from_expr<Expr>::type;
+public:
+  using type =
+      decltype(std::tuple_cat(std::declval<left>()));
+};

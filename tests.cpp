@@ -10,8 +10,6 @@
 #include "values.hpp"
 #include <gtest/gtest.h>
 
-template <typename TExpression>
-using derivatives_type = decltype(make_derivatives(std::declval<TExpression>()));
 
 TEST(ExpressionTest, StaticTests) {
   static_assert(
@@ -163,13 +161,13 @@ TEST(EquationTest, DerivativeTest2) {
   auto c2 = PC(2);
   auto expr = c1*x + c2*y;
   auto eq = Equation(expr);
+  std::cout << eq;
   auto derivs = eq.get_derivatives();
   auto dcount = std::tuple_size_v<decltype(derivs)>;
   ASSERT_EQ(dcount, 2);
 
   auto d1 = std::get<0>(derivs);
   auto d2 = std::get<1>(derivs);
-
 }
 
 TEST(EquationTest, SetUpBasic) {
