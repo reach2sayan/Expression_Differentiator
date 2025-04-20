@@ -131,11 +131,12 @@ TEST(EquationTest, SetUpBasic) {
   constexpr Variable<int, 'x'> b{2};
   constexpr Variable<int, 'y'> c{3};
   constexpr auto sum_exp = a * b * c;
-  constexpr Equation eq{sum_exp};
+  Equation eq{sum_exp};
   constexpr auto arr = collect_variable_labels(eq.get_expression());
   auto arr2 = make_all_constant_except<'y'>(sum_exp);
   auto arr3 = make_all_constant_except<'x'>(sum_exp);
   std::cout << sum_exp << "\n";
   std::cout << arr2 << "\n";
   std::cout << arr3 << "\n";
+  auto labels = collect_variable_labels(sum_exp); // std::array<char, N>
 }
