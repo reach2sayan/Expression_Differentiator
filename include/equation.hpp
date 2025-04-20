@@ -27,12 +27,11 @@ constexpr auto make_derivatives(const std::tuple<Chars...> &chars,
 }
 
 template <typename TExpression> class Equation {
-public:
-  constexpr static size_t var_count = std::decay_t<TExpression>::var_count;
-
 private:
   TExpression expression;
-  using symbolslist = typename extract_symbols_from_expr<decltype(expression)>::type;
+  using symbolslist =
+      typename extract_symbols_from_expr<decltype(expression)>::type;
+
 public:
   using value_type = typename TExpression::value_type;
   constexpr operator value_type() const { return expression; }

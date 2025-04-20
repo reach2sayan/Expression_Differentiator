@@ -10,7 +10,6 @@ template <typename> class Derivative {
 #if !DEPRECATED_DERIVATIVE
 template <typename TExpression>
 constexpr auto collect_variable_labels(const TExpression &expression) {
-  constexpr std::size_t N = TExpression::var_count;
   std::array<char, N> result{};
   std::size_t index = 0;
   make_labels_array(expression, result, index);

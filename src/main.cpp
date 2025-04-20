@@ -52,9 +52,11 @@ int main() {
   auto d = extract_symbols_from_expr<decltype(tmp)>::type{};
   auto k = make_derivatives(d,tmp);
   print_tup(k);
+
+  Equation e(tmp);
+  auto derivs = e.get_derivatives();
   //TD<decltype(k), decltype(d), decltype(tmp)> td;
   /*
-  static_assert(tmp.var_count == 2);
   auto tmp2 = a * b;
   auto tmp3 = a / b;
   std::cout << tmp3 << std::endl;
