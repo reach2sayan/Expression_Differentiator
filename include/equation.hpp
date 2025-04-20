@@ -31,15 +31,21 @@ private:
   TExpression expression;
   using symbolslist =
       typename extract_symbols_from_expr<decltype(expression)>::type;
+  using derivatives_t =
+      decltype(make_derivatives(std::declval<symbolslist>(), expression));
+  derivatives_t derivatives;
+
+  constexpr static auto get_derivatives_impl(const TExpression& expr) {
+    return make_derivatives(symbolslist{}, expr);
+  }
 
 public:
   using value_type = typename TExpression::value_type;
   constexpr operator value_type() const { return expression; }
-  constexpr const TExpression &get_expression() const { return expression; }
-  constexpr auto get_derivatives() const {
-    return make_derivatives(symbolslist{}, expression);
-  }
-  constexpr Equation(const TExpression &e) : expression{e} {}
+  constexpr const auto &get_expression() const { return expression; }
+  constexpr const auto &get_derivatives() const { return derivatives; }
+
+  constexpr Equation(const TExpression &e) : expression{e}, derivatives{get_derivatives_impl(e)} {}
 };
 
 template <typename T> Equation(T &&) -> Equation<std::decay_t<T>>;

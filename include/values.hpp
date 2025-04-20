@@ -138,8 +138,7 @@ constexpr auto sin(const LHS &a) {
 
 
 
-#define PVl(x, label) Variable<decltype(x), label>(x)
-#define PV(x) Variable(x)
+#define PV(x, label) Variable<decltype(x), label>(x)
 #define PC(x) Constant(x)
 
 #define DEFINE_CONST_UDL(type, suffix)                                         \

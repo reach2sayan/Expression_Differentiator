@@ -139,6 +139,39 @@ TEST(EquationTest, DerivativeStatic) {
   //Derivative d{eq.get_expression()};
 }
 
+TEST(EquationTest, DerivativeTest1) {
+  auto x = PV(4,'x');
+  auto y = PV(2,'y');
+  auto expr = x * y;
+  auto eq = Equation(expr);
+  auto derivs = eq.get_derivatives();
+  auto dcount = std::tuple_size_v<decltype(derivs)>;
+  ASSERT_EQ(dcount, 2);
+
+  auto d1 = std::get<0>(derivs);
+  auto d2 = std::get<1>(derivs);
+
+  ASSERT_EQ(expr, 8);
+  ASSERT_EQ(d1, 2);
+  ASSERT_EQ(d2, 4);
+}
+
+TEST(EquationTest, DerivativeTest2) {
+  auto x = PV(4,'x');
+  auto y = PV(2,'y');
+  auto c1 = PC(1);
+  auto c2 = PC(2);
+  auto expr = c1*x + c2*y;
+  auto eq = Equation(expr);
+  auto derivs = eq.get_derivatives();
+  auto dcount = std::tuple_size_v<decltype(derivs)>;
+  ASSERT_EQ(dcount, 2);
+
+  auto d1 = std::get<0>(derivs);
+  auto d2 = std::get<1>(derivs);
+
+}
+
 TEST(EquationTest, SetUpBasic) {
   constexpr auto a = 1_ci;
   constexpr Variable<int, 'x'> b{2};
