@@ -150,7 +150,7 @@ TEST(EquationTest, SetUpBasic) {
   //constexpr auto v = make_derivatives(sum_exp);
   auto v = extract_symbols_from_expr<decltype(sum_exp)>::type{};
   //static_assert(std::is_same<decltype(v),int>::value);
-  using Result = extract_charlist<decltype(sum_exp)>::type;
+  //using Result = extract_charlist<decltype(sum_exp)>::type;
 
   //auto v = std::tuple{make_all_constant_except<'x'>(sum_exp), make_all_constant_except<'y'>(sum_exp)};
 
