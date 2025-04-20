@@ -46,6 +46,3 @@ int main() {
   Equation e(tmp);
   std::cout << (int)e << std::endl;
 }
-
-template <typename T, template <typename> typename Op>
-using as_const_exp = Expression<Op<T>, Variable<T,'x'>, Constant<T>>;

@@ -163,3 +163,31 @@ constexpr auto make_all_constant_except(const MonoExpression<Op, Expr> &expr)
     -> constify_unmatched_var_t<symbol, MonoExpression<Op, Expr>> {
   return make_all_constant_except<symbol>(expr.expressions());
 }
+
+template <size_t I, size_t N>
+constexpr char get_char_at(const std::array<char, N> &arr) {
+  return arr[I];
+}
+
+template <size_t Index = 0, size_t N>
+constexpr auto to_char_sequence_helper(const std::array<char, N> &arr,
+                                       std::integer_sequence<char>) {
+  return std::integer_sequence<char>{};
+}
+
+// Recursive case
+template <size_t Index = 0, size_t N, char... Cs>
+constexpr auto to_char_sequence_helper(const std::array<char, N> &arr,
+                                       std::integer_sequence<char, Cs...>) {
+  if constexpr (Index >= N) {
+    return std::integer_sequence<char, Cs...>{};
+  } else {
+    return to_char_sequence_helper<Index + 1>(
+        arr, std::integer_sequence<char, Cs..., arr[Index]>{});
+  }
+}
+
+template <size_t N>
+constexpr auto to_char_sequence(const std::array<char, N> &arr) {
+  return to_char_sequence_helper(arr, std::integer_sequence<char>{});
+}

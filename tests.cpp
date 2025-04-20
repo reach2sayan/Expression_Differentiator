@@ -2,6 +2,7 @@
 // Created by sayan on 4/13/25.
 //
 
+#include "derivative.hpp"
 #include "equation.hpp"
 #include "operations.hpp"
 #include "procvar.hpp"
@@ -131,7 +132,8 @@ TEST(EquationTest, SetUpBasic) {
   constexpr Variable<int, 'x'> b{2};
   constexpr Variable<int, 'y'> c{3};
   constexpr auto sum_exp = a * b * c;
-  Equation eq{sum_exp};
+  constexpr Equation eq{sum_exp};
+  constexpr Derivative d{eq.get_expression()};
   constexpr auto arr = collect_variable_labels(eq.get_expression());
   auto arr2 = make_all_constant_except<'y'>(sum_exp);
   auto arr3 = make_all_constant_except<'x'>(sum_exp);
