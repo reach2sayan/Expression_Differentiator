@@ -24,7 +24,12 @@ void print_tup(const TupType &_tup, std::index_sequence<I...>) {
 template <class... T> void print_tup(const std::tuple<T...> &_tup) {
   print_tup(_tup, std::make_index_sequence<sizeof...(T)>());
 }
+#define PRINT_TUP(tup) print_tup(tup)
+#else
+#define PRINT_TUP(tup)
 #endif
+
+
 
 int main() {
   auto target = Sum<int>(Constant{3}, Constant{1});
@@ -48,7 +53,7 @@ int main() {
   std::cout << "a + b + oter \n= " << tmp << "\n= " << tmp.eval() << "\n";
   auto d = extract_symbols_from_expr<decltype(tmp)>::type{};
   auto k = make_derivatives(d, tmp);
-  print_tup(k);
+  PRINT_TUP(k);
 
   Equation e(tmp);
   //auto derivs = e.get_derivatives();
