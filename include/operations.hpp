@@ -153,8 +153,7 @@ struct CosineOp
 template <typename T>
 template <typename Expr>
 constexpr auto CosineOp<T>::derivative(const Expr &lhs) {
-  auto d = lhs.derivative();
-  return Negate<T>(Multiply<T>(Sine<T>(std::move(lhs)), std::move(d)));
+  return Negate<T>(Multiply<T>(Sine<T>(lhs), lhs.derivative()));
 }
 
 template <typename T>
