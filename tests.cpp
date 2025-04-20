@@ -51,7 +51,6 @@ TEST(ExpressionTest, MultiplyTest) {
 TEST(ExpressionTest, SubtractTest) {
   auto a = 1_ci;
   auto b = 2_vi;
-  auto c = 3_ci;
   auto minus = a - b;
   auto d = minus.derivative();
   ASSERT_EQ(minus, -1);
@@ -161,31 +160,26 @@ TEST(EquationTest, DerivativeTest2) {
   auto c2 = PC(2);
   auto expr = c1*x + c2*y;
   auto eq = Equation(expr);
-  std::cout << eq;
   auto derivs = eq.get_derivatives();
   auto dcount = std::tuple_size_v<decltype(derivs)>;
   ASSERT_EQ(dcount, 2);
-
-  auto d1 = std::get<0>(derivs);
-  auto d2 = std::get<1>(derivs);
+  ASSERT_EQ(std::get<0>(derivs),1);
+  ASSERT_EQ(std::get<1>(derivs),2);
 }
 
-TEST(EquationTest, SetUpBasic) {
-  constexpr auto a = 1_ci;
-  constexpr Variable<int, 'x'> b{2};
-  constexpr Variable<int, 'y'> c{3};
-  constexpr auto sum_exp = a * b * c;
-  Equation eq{sum_exp};
-  //constexpr auto labels = collect_variable_labels(sum_exp);
-  //constexpr auto label_tuple = std::tuple_cat(labels);
-  //constexpr auto v = make_derivatives(sum_exp);
-  auto v = extract_symbols_from_expr<decltype(sum_exp)>::type{};
-  //static_assert(std::is_same<decltype(v),int>::value);
-  //using Result = extract_charlist<decltype(sum_exp)>::type;
+TEST(EquationTest, DerivativeTest3) {
+  constexpr auto x = PV(4,'x');  // x = 4
+  constexpr auto y = PV(2,'y');  // y = 2
+  constexpr auto expr = (x + y) * (x - y);  // (x + y) * (x - y)
+  constexpr auto eq = Equation(expr);
+  constexpr auto derivs = eq.get_derivatives();
 
-  //auto v = std::tuple{make_all_constant_except<'x'>(sum_exp), make_all_constant_except<'y'>(sum_exp)};
-
-  //static_assert(std::is_same_v<decltype(label_tuple), std::tuple<char,char>>,"failed");
-  auto v3 = std::tuple{make_all_constant_except<'x'>(sum_exp), make_all_constant_except<'y'>(sum_exp)};
-
+  constexpr auto d1 = std::get<0>(derivs);  // derivative w.r.t x
+  constexpr auto d2 = std::get<1>(derivs);  // derivative w.r.t y
+  static_assert(expr == 12);
+  static_assert(d1 == 8);
+  static_assert(d2 == -4  );
+  ASSERT_EQ(expr, 12);  // (4 + 2) * (4 - 2) = 6 * 2 = 12
+  ASSERT_EQ(d1, 8);    // derivative w.r.t x: 2x = 8
+  ASSERT_EQ(d2, -4);   // derivative w.r.t y: -2y = -4
 }
