@@ -36,10 +36,10 @@ template <typename... Chars, typename Op, typename LHS, typename RHS>
 constexpr auto make_derivatives(const std::tuple<Chars...> &chars,
                                 const Expression<Op, LHS, RHS> &expr) {
 
-  auto make_derivatives_impl = []<typename Tuple, typename _Op, typename LHS,
-                                  typename RHS, std::size_t... Is>(
+  auto make_derivatives_impl = []<typename Tuple, typename _Op, typename _LHS,
+                                  typename _RHS, std::size_t... Is>(
                                    const Tuple &chars,
-                                   const Expression<_Op, LHS, RHS> &expr,
+                                   const Expression<_Op, _LHS, _RHS> &expr,
                                    std::index_sequence<Is...>) {
     return std::make_tuple(
         make_all_constant_except<std::tuple_element_t<Is, Tuple>::value>(expr)
