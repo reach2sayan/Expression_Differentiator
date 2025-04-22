@@ -22,7 +22,10 @@ private:
 
   constexpr auto &get_equations() { return equations; }
   constexpr const auto &get_equations() const { return equations; }
-
+  friend std::ostream &operator<<(std::ostream &out, const SystemOfEquations &e) {
+    print_tup(out, e.equations);
+    return out;
+  }
 public:
   using value_type =
       typename std::tuple_element_t<0, std::tuple<TEquations...>>::value_type;
