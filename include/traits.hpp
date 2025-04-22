@@ -200,11 +200,9 @@ struct sort_tuple<std::tuple<Head, Tail...>> {
 
 template <typename Tuple> using sort_tuple_t = typename sort_tuple<Tuple>::type;
 
-// Comparison: same ::value
 template <typename A, typename B>
 constexpr bool same_value = (A::value == B::value);
 
-// Base case: empty
 template <typename Tuple> struct unique_tuple;
 
 template <> struct unique_tuple<std::tuple<>> {
