@@ -200,11 +200,9 @@ struct sort_tuple<std::tuple<Head, Tail...>> {
 
 template <typename Tuple> using sort_tuple_t = typename sort_tuple<Tuple>::type;
 
-// Comparison: same ::value
 template <typename A, typename B>
 constexpr bool same_value = (A::value == B::value);
 
-// Base case: empty
 template <typename Tuple> struct unique_tuple;
 
 template <> struct unique_tuple<std::tuple<>> {
@@ -261,6 +259,64 @@ private:
 public:
   using type = sort_tuple_t<decltype(std::tuple_cat(std::declval<left>()))>;
 };
+
+template <typename T, typename Tuple> struct tuple_contains;
+
+template <typename T, typename... Types>
+struct tuple_contains<T, std::tuple<Types...>>
+    : std::disjunction<std::is_same<T, Types>...> {};
+
+template <typename Tuple1, typename Tuple2, typename = void>
+struct tuple_union_impl;
+
+template <typename... T1s>
+struct tuple_union_impl<std::tuple<T1s...>, std::tuple<>> {
+  using type = std::tuple<T1s...>;
+};
+
+template <typename... T1s, typename T2, typename... T2s>
+struct tuple_union_impl<std::tuple<T1s...>, std::tuple<T2, T2s...>> {
+  using next_tuple =
+      typename std::conditional_t<tuple_contains<T2, std::tuple<T1s...>>::value,
+                                std::tuple<T1s...>,
+                                std::tuple<T1s..., T2>>;
+
+  using type = typename tuple_union_impl<next_tuple, std::tuple<T2s...>>::type;
+};
+
+template <typename Tuple1, typename Tuple2> struct tuple_union {
+  using type = typename tuple_union_impl<Tuple1, Tuple2>::type;
+};
+
+template <typename Tuple1, typename Tuple2>
+using tuple_union_t = typename tuple_union<Tuple1, Tuple2>::type;
+
+template <typename Tuple1, typename Tuple2, typename Result = std::tuple<>>
+struct tuple_difference_impl;
+
+template <typename Tuple2, typename... Rs>
+struct tuple_difference_impl<std::tuple<>, Tuple2, std::tuple<Rs...>> {
+    using type = std::tuple<Rs...>;
+};
+
+template <typename T1, typename... T1s, typename Tuple2, typename... Rs>
+struct tuple_difference_impl<std::tuple<T1, T1s...>, Tuple2, std::tuple<Rs...>> {
+    using next_result = typename std::conditional_t<
+        !tuple_contains<T1, Tuple2>::value,
+        std::tuple<Rs..., T1>,
+        std::tuple<Rs...>
+    >;
+    using type = typename tuple_difference_impl<std::tuple<T1s...>, Tuple2, next_result>::type;
+};
+
+template <typename Tuple1, typename Tuple2>
+struct tuple_difference {
+    using type = typename tuple_difference_impl<Tuple1, Tuple2, std::tuple<>>::type;
+};
+
+
+template <typename Tuple1, typename Tuple2>
+using tuple_difference_t = typename tuple_difference<Tuple1, Tuple2>::type;
 
 template <size_t value> struct idx_t : std::integral_constant<size_t, value> {};
 #define IDX(value)                                                             \
