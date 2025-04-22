@@ -170,6 +170,65 @@ constexpr auto make_all_constant_except(const MonoExpression<Op, Expr> &expr)
   return make_all_constant_except<symbol>(expr.expressions());
 }
 
+template <typename T> constexpr char get_value = T::value;
+template <typename T, typename Sorted> struct insert_sorted;
+
+template <typename T> struct insert_sorted<T, std::tuple<>> {
+  using type = std::tuple<T>;
+};
+
+template <typename T, typename Head, typename... Tail>
+struct insert_sorted<T, std::tuple<Head, Tail...>> {
+  using type = std::conditional_t<
+      (get_value<T> < get_value<Head>), std::tuple<T, Head, Tail...>,
+      decltype(std::tuple_cat(
+          std::tuple<Head>{},
+          typename insert_sorted<T, std::tuple<Tail...>>::type{}))>;
+};
+
+template <typename Input> struct sort_tuple;
+
+template <> struct sort_tuple<std::tuple<>> {
+  using type = std::tuple<>;
+};
+
+template <typename Head, typename... Tail>
+struct sort_tuple<std::tuple<Head, Tail...>> {
+  using sorted_tail = typename sort_tuple<std::tuple<Tail...>>::type;
+  using type = typename insert_sorted<Head, sorted_tail>::type;
+};
+
+template <typename Tuple> using sort_tuple_t = typename sort_tuple<Tuple>::type;
+
+// Comparison: same ::value
+template <typename A, typename B>
+constexpr bool same_value = (A::value == B::value);
+
+// Base case: empty
+template <typename Tuple> struct unique_tuple;
+
+template <> struct unique_tuple<std::tuple<>> {
+  using type = std::tuple<>;
+};
+
+template <typename T> struct unique_tuple<std::tuple<T>> {
+  using type = std::tuple<T>;
+};
+
+template <typename A, typename B, typename... Rest>
+struct unique_tuple<std::tuple<A, B, Rest...>> {
+  using tail = std::conditional_t<same_value<A, B>, std::tuple<B, Rest...>,
+                                  std::tuple<B, Rest...>>;
+
+  using rest_unique = typename unique_tuple<tail>::type;
+
+  using type = std::conditional_t<same_value<A, B>, rest_unique,
+                                  decltype(std::tuple_cat(std::tuple<A>{},
+                                                          rest_unique{}))>;
+};
+
+template <typename T> using unique_tuple_t = typename unique_tuple<T>::type;
+
 template <typename T> struct extract_variable_symbols {
   using type = std::tuple<>;
 };
@@ -190,8 +249,8 @@ private:
   using right = typename extract_symbols_from_expr<RHS>::type;
 
 public:
-  using type =
-      decltype(std::tuple_cat(std::declval<left>(), std::declval<right>()));
+  using type = unique_tuple_t<sort_tuple_t<decltype(std::tuple_cat(
+      std::declval<left>(), std::declval<right>()))>>;
 };
 
 template <typename Op, typename Expr>
@@ -200,7 +259,7 @@ private:
   using left = typename extract_symbols_from_expr<Expr>::type;
 
 public:
-  using type = decltype(std::tuple_cat(std::declval<left>()));
+  using type = sort_tuple_t<decltype(std::tuple_cat(std::declval<left>()))>;
 };
 
 template <typename T, typename Tuple> struct tuple_contains;
@@ -260,3 +319,12 @@ struct tuple_difference {
 
 template <typename Tuple1, typename Tuple2>
 using tuple_difference_t = typename tuple_difference<Tuple1, Tuple2>::type;
+
+template <size_t value> struct idx_t : std::integral_constant<size_t, value> {};
+#define IDX(value)                                                             \
+  idx_t<value> {}
+
+template <typename Head, typename... Tail>
+constexpr static inline bool all_tuple_type_same =
+    (std::is_same_v<typename Head::value_type, typename Tail::value_type> &&
+     ...);

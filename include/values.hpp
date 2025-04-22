@@ -6,6 +6,11 @@
 #include <string>
 template <typename T> struct DivideOp;
 
+constexpr bool PRINT_VARIABLE_VALUE = false;
+constexpr bool PRINT_VARIABLE_LABEL = true;
+constexpr bool PRINT_CONSTANT_VALUE = true;
+constexpr bool PRINT_CONSTANT_LABEL = false;
+
 #define VALUE_TYPE_MISMATCH_ASSERT(T, U)                                       \
   static_assert(                                                               \
       std::is_same_v<typename T::value_type, typename U::value_type> ||        \
@@ -26,7 +31,7 @@ public:
 };
 constexpr static character_generator cgenerator{};
 
-struct Operators {
+struct IOperators {
   template <typename LHS, typename RHS>
   friend constexpr auto operator+(const LHS &a, const RHS &b);
 
@@ -58,10 +63,14 @@ struct Operators {
   }
 };
 
-template <typename T> class Constant : public Operators {
+template <typename T> class Constant : public IOperators {
   const T value;
   friend std::ostream &operator<<(std::ostream &out, const Constant<T> &c) {
-    return out << std::to_string(c.value) << std::string_view{"_c"};
+    if (PRINT_CONSTANT_VALUE)
+      out << std::to_string(c.value);
+    if (PRINT_CONSTANT_LABEL)
+      out << std::string_view{"_c"};
+    return out;
   }
   constexpr auto eval() const { return value; }
 
@@ -73,11 +82,17 @@ public:
   constexpr auto derivative() const { return Constant{T{}}; }
 };
 
-template <typename T, char symbol> class Variable : public Operators {
+template <typename T, char symbol> class Variable : public IOperators {
   T value;
   friend std::ostream &operator<<(std::ostream &out,
                                   const Variable<T, symbol> &c) {
-    return out << std::to_string(c.value) << "_" << symbol;
+    if (PRINT_VARIABLE_VALUE) {
+      out << std::to_string(c.value) << "_";
+    }
+    if (PRINT_VARIABLE_LABEL) {
+      out << symbol;
+    }
+    return out;
   }
   static constexpr inline size_t static_counter = 0;
   constexpr T eval() const { return value; }
@@ -137,12 +152,6 @@ constexpr auto operator^(const LHS &a, const RHS &b) {
   VALUE_TYPE_MISMATCH_ASSERT(LHS, RHS);
   using value_type = typename LHS::value_type;
   return Exp<value_type>(a, b);
-}
-
-template <typename T, typename Expr> constexpr auto cos(const Expr &a) {
-  // VALUE_TYPE_MISMATCH_ASSERT(LHS, RHS);
-  using value_type = typename Expr::value_type;
-  return Cosine<value_type>(a);
 }
 
 #define PV(x, label) Variable<decltype(x), label>(x)

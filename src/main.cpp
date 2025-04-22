@@ -10,12 +10,11 @@ template <typename... T> struct TD;
 #include "procvar.hpp"
 #include "traits.hpp"
 #include "values.hpp"
+#include "soequations.hpp"
 #include <iostream>
 #include <string>
 
 #define PRINT_TUP(tup) print_tup(tup)
-
-
 
 int main() {
   auto target = Sum<int>(Constant{3}, Constant{1});
@@ -42,8 +41,36 @@ int main() {
 
   Equation e(tmp);
   std::cout << e;
+  Equation e3(a-b*oter);
+  std::cout <<"----------------------\n";
+  Equation e2(a * b * oter);
+  std::cout << e2 << std::endl;
+  std::cout << e2.eval() << std::endl;
+  for (auto c: e2.eval_derivatives())
+    std::cout << c << ", ";
+  std::cout <<"----------------------\n";
+  SystemOfEquations soe(e, e2,e3);
+  auto res = soe.eval();
+  std::cout << "System of equations\n";
+  for (auto &r : res) {
+    std::cout << r << ", ";
+  }
+  constexpr auto sq = soe.is_square;
+  auto jac = soe.jacobian();
+  std::cout << "Jacobian\n";
+  for (auto r : jac) {
+    for (auto c : r) {
+      std::cout << c << ", ";
+    }
+    std::cout << "\n";
+  }
 
-  Equation e2(a * b);
-  std::cout << e2;
-  auto derivs = e2.get_derivatives();
+  constexpr auto x1 = PV(4,'y');  // x = 4
+  constexpr auto y2 = PV(2,'x');  // y = 2
+  constexpr auto expr1 = x1 + y2 + x1 * y2;  // (x + y) * (x - y)
+  constexpr auto eq = Equation(expr1);
+
+  std::cout << eq << std::endl;
+  std::cout <<"----------------------\n";
+  std::cout << soe;
 }
