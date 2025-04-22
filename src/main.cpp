@@ -70,5 +70,7 @@ int main() {
   constexpr auto expr1 = x1 + y2 + x1 * y2;  // (x + y) * (x - y)
   constexpr auto eq = Equation(expr1);
 
-  std::cout << eq;
+  std::cout << eq << std::endl;
+  std::cout <<"----------------------\n";
+  std::cout << soe;
 }
