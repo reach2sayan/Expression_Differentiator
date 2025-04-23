@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include "soequations.hpp"
+#include "../expression_template/soequations.hpp"
 #include <experimental/mdspan>
 
 constexpr double EPSILON = 1e-10;

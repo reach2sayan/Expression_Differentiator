@@ -6,12 +6,12 @@
 
 template <typename... T> struct TD;
 
-#include "equation.hpp"
-#include "procvar.hpp"
-#include "soequations.hpp"
-#include "traits.hpp"
-#include "values.hpp"
-#include "solver.hpp"
+#include "../include/expression_template/equation.hpp"
+#include "../include/expression_template/procvar.hpp"
+#include "../include/expression_template/values.hpp"
+#include "../include/solver/solver.hpp"
+#include "../include/expression_template/soequations.hpp"
+#include "../include/expression_template/traits.hpp"
 #include <iostream>
 #include <string>
 
@@ -101,6 +101,6 @@ int main() {
   constexpr auto b2 = 2.0_cd;
   constexpr auto divide = a1 / b2;
   constexpr auto d1 = divide.derivative();
-  std::cout << d1;
+  std::cout << d1.eval() << std::endl;
   // TD<tuple_union_t<decltype(sl),decltype(s2)>> _;
 }

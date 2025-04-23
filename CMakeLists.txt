@@ -9,10 +9,10 @@ else ()
     add_compile_options(-Wall -Wpedantic -Wfatal-errors)
 endif ()
 
+include(FetchContent)
+
 option(getmdspan "Build kokkss MDSpan?" ON)
 set(getmdspan ON CACHE BOOL "Build kokkss MDSpan?" FORCE)
-option(getgenerator "Build Generator?" OFF)
-include(FetchContent)
 
 if (getmdspan)
     FetchContent_Declare(
@@ -23,13 +23,18 @@ if (getmdspan)
     FetchContent_MakeAvailable(mdspan)
 endif ()
 
-if (getgenerator)
-    FetchContent_Declare(
-            generator
-            GIT_REPOSITORY https://github.com/lewissbaker/generator.git
-            GIT_TAG main
+option(includeeigen "Include Eigen3?" ON)
+set(includeeigen ON CACHE BOOL "Include Eigen3?" FORCE)
+if(includeeigen)
+    FetchContent_Declare(Eigen3
+            GIT_REPOSITORY    https://gitlab.com/libeigen/eigen.git
+            GIT_PROGRESS	  TRUE
     )
-    FetchContent_MakeAvailable(generator)
+    IF(NOT eigen3_POPULATED)
+        FETCHCONTENT_POPULATE(Eigen3)
+        FETCHCONTENT_MAKEAVAILABLE(Eigen3)
+        ADD_SUBDIRECTORY(${eigen3_SOURCE_DIR} ${eigen3_BUILD_DIR})
+    ENDIF()
 endif ()
 
 FetchContent_Declare(
@@ -39,33 +44,46 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
-add_library(expression_solver INTERFACE
-        include/values.hpp
-        include/operations.hpp
-        include/equation.hpp
-        include/traits.hpp
-        include/procvar.hpp
-        include/derivative.hpp
-        include/soequations.hpp
-        include/solver.hpp
+add_library(expression_template INTERFACE
+        ${CMAKE_SOURCE_DIR}/include/expression_template/values.hpp
+        ${CMAKE_SOURCE_DIR}/include/expression_template/operations.hpp
+        ${CMAKE_SOURCE_DIR}/include/expression_template/equation.hpp
+        ${CMAKE_SOURCE_DIR}/include/expression_template/traits.hpp
+        ${CMAKE_SOURCE_DIR}/include/expression_template/procvar.hpp
+        ${CMAKE_SOURCE_DIR}/include/expression_template/derivative.hpp
+        ${CMAKE_SOURCE_DIR}/include/expression_template/soequations.hpp
 )
 
-target_include_directories(expression_solver INTERFACE
-        ${CMAKE_SOURCE_DIR}/include
+add_library(expression_solver SHARED
+        include/solver/solver.hpp
+        src/solver.cpp)
+
+target_include_directories(expression_solver PRIVATE
         ${mdspan_SOURCE_DIR}/include
+        ${CMAKE_SOURCE_DIR}/include/solver
 )
 
-add_executable(ExpressionSolver src/main.cpp)
-
-target_include_directories(ExpressionSolver PRIVATE
-        ${CMAKE_SOURCE_DIR}/include
+target_link_libraries(expression_solver PRIVATE
+        expression_template
+        Eigen3::Eigen
 )
-target_link_libraries(ExpressionSolver PUBLIC expression_solver)
+
+add_executable(main src/main.cpp)
+
+target_include_directories(main PRIVATE
+        ${mdspan_SOURCE_DIR}/include
+        ${CMAKE_SOURCE_DIR}/include/solver
+)
+target_link_libraries(main PUBLIC expression_template
+        expression_solver
+        Eigen3::Eigen
+)
 
 add_executable(tests tests.cpp)
-target_link_libraries(tests gtest_main expression_solver)
+target_link_libraries(tests gtest_main expression_solver Eigen3::Eigen)
 target_include_directories(tests PRIVATE
-        ${CMAKE_SOURCE_DIR}/include
+        ${CMAKE_SOURCE_DIR}/include/expression_template
+        ${CMAKE_SOURCE_DIR}/include/solver
 )
 
 add_test(NAME tests COMMAND tests)

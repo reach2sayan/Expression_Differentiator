@@ -3,8 +3,8 @@
 //
 
 #pragma once
-#include "expressions.hpp"
 #include "values.hpp"
+#include "expressions.hpp"
 #include <array>
 #include <type_traits>
 
