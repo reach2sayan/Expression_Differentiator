@@ -6,6 +6,7 @@
 #include "expressions.hpp"
 #include "operations.hpp"
 #include "traits.hpp"
+#include <cassert>
 
 template <class... T>
 constexpr inline std::ostream &print_tup(std::ostream &out,
@@ -79,7 +80,10 @@ public:
     }
   }
 
-  constexpr void update(const auto& symbols, const auto &updates) { expression.update(symbols, updates); }
+  constexpr void update(const auto& symbols, const auto &updates) {
+    expression.update(symbols, updates);
+    assert(symbolslist{} == symbols);
+  }
   constexpr auto eval() const { return expression.eval(); }
   constexpr auto eval_derivatives() const {
     auto eval_derivatives_helper =
