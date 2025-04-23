@@ -51,11 +51,16 @@ public:
   using value_type =
       typename std::tuple_element_t<0, std::tuple<TEquations...>>::value_type;
   constexpr static size_t number_of_equations = sizeof...(TEquations);
+  using symbols_list_t = std::tuple_element_t<0,std::tuple<TEquations...>>::symbolslist;
+
   static constexpr bool is_square =
       (... && (std::tuple_size_v<typename TEquations::derivatives_t> ==
                number_of_equations));
-
-  void update(const std::array<value_type, number_of_equations> &updates);
+  /*
+  void update(const std::array<value_type, number_of_equations> &updates) {
+    auto values_with_labels = make_tuple_of_pairs(symbols_list_t{},updates);
+    std::get<0>(equations).expression.update(updates);
+  }*/
   constexpr auto eval() const;
   constexpr auto jacobian() const -> std::enable_if_t<
       is_square,

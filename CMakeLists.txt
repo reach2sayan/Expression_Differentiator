@@ -54,18 +54,14 @@ add_library(expression_template INTERFACE
         ${CMAKE_SOURCE_DIR}/include/expression_template/soequations.hpp
 )
 
-add_library(expression_solver SHARED
-        include/solver/solver.hpp
-        src/solver.cpp)
-
+add_library(expression_solver SHARED src/solver.cpp)
 target_include_directories(expression_solver PRIVATE
         ${mdspan_SOURCE_DIR}/include
-        ${CMAKE_SOURCE_DIR}/include/solver
+        ${CMAKE_SOURCE_DIR}/include/expression_template
 )
 
 target_link_libraries(expression_solver PRIVATE
         expression_template
-        Eigen3::Eigen
 )
 
 add_executable(main src/main.cpp)
@@ -73,10 +69,10 @@ add_executable(main src/main.cpp)
 target_include_directories(main PRIVATE
         ${mdspan_SOURCE_DIR}/include
         ${CMAKE_SOURCE_DIR}/include/solver
+        ${CMAKE_SOURCE_DIR}/include/expression_template
 )
 target_link_libraries(main PUBLIC expression_template
         expression_solver
-        Eigen3::Eigen
 )
 
 add_executable(tests tests.cpp)

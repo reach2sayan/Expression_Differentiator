@@ -6,12 +6,12 @@
 
 template <typename... T> struct TD;
 
-#include "../include/expression_template/equation.hpp"
-#include "../include/expression_template/procvar.hpp"
-#include "../include/expression_template/values.hpp"
-#include "../include/solver/solver.hpp"
-#include "../include/expression_template/soequations.hpp"
-#include "../include/expression_template/traits.hpp"
+#include "equation.hpp"
+#include "procvar.hpp"
+#include "values.hpp"
+#include "solver.hpp"
+#include "soequations.hpp"
+#include "traits.hpp"
 #include <iostream>
 #include <string>
 
@@ -94,8 +94,10 @@ int main() {
   }
   std::cout << "\n";
   constexpr bool squa = soee.is_square;
+  constexpr auto k = decltype(soee)::symbols_list_t{};
+  constexpr std::array<int, 2> arr = {1, 2};
+  auto xhs = make_tuple_of_pairs(k,arr);
   auto sol = NewtonRaphson(soee);
-  auto sss = sol.invert_jacobian();
 
   constexpr auto a1 = 4.0_vd;
   constexpr auto b2 = 2.0_cd;

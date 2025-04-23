@@ -49,12 +49,18 @@ public:
   using op_type = Op;
   using lhs_type = LHS;
   using rhs_type = RHS;
+
   using value_type = typename BaseExpression<Op>::value_type;
   constexpr auto &expressions() const { return inner_expressions; }
   constexpr Expression(LHS, RHS);
   constexpr auto eval() const;
   constexpr operator value_type() const { return eval(); }
   constexpr auto derivative() const;
+  /*
+  constexpr void update(const std::array<value_type, 4> &updates) {
+    inner_expressions.first.update(updates);
+    inner_expressions.second.update(updates);
+  }*/
 };
 
 template <typename Op, typename LHS, typename RHS>

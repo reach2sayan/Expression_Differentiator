@@ -4,6 +4,7 @@
 
 #pragma once
 #include <string>
+
 template <typename T> struct DivideOp;
 
 constexpr bool PRINT_VARIABLE_VALUE = false;
@@ -80,6 +81,9 @@ public:
   constexpr auto get() const { return value; }
   constexpr operator T() const { return value; }
   constexpr auto derivative() const { return Constant{T{}}; }
+  constexpr void update(...) const {
+    // No update needed for constant
+  }
 };
 
 template <typename T, char symbol> class Variable : public IOperators {
@@ -113,6 +117,7 @@ public:
     return *this;
   }
 
+  //constexpr void update(const std::array<, 4> &updates) {}
   constexpr auto derivative() const {
     auto ret = T{};
     return Constant{++ret};

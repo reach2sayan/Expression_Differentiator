@@ -78,6 +78,11 @@ public:
       return std::get<N - 1>(derivatives);
     }
   }
+  /*
+  constexpr void
+  update(const std::array<value_type, number_of_derivatives> &updates) {
+    expression.update(updates);
+  }*/
   constexpr auto eval() const { return expression.eval(); }
   constexpr auto eval_derivatives() const {
     auto eval_derivatives_helper =
