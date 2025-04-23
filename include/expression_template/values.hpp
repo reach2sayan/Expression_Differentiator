@@ -32,6 +32,21 @@ public:
 };
 constexpr static character_generator cgenerator{};
 
+template <char C, typename Tuple, std::size_t I = 0>
+constexpr std::size_t index_of_char_in_tuple() {
+  if constexpr (I >= std::tuple_size_v<std::decay_t<Tuple>>) {
+    static_assert(I < std::tuple_size_v<Tuple>, "Character not found in tuple");
+    return -1;
+  } else {
+    using Elem = std::tuple_element_t<I, std::decay_t<Tuple>>;
+    if constexpr (Elem::value == C) {
+      return I;
+    } else {
+      return index_of_char_in_tuple<C, Tuple, I + 1>();
+    }
+  }
+}
+
 struct IOperators {
   template <typename LHS, typename RHS>
   friend constexpr auto operator+(const LHS &a, const RHS &b);
@@ -117,7 +132,10 @@ public:
     return *this;
   }
 
-  //constexpr void update(const std::array<, 4> &updates) {}
+  constexpr void update(const auto& symbols, const auto &updates) {
+    constexpr auto index = index_of_char_in_tuple<symbol, decltype(symbols)>();
+    auto _ = this->operator=(updates[index]);
+  }
   constexpr auto derivative() const {
     auto ret = T{};
     return Constant{++ret};

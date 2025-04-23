@@ -56,11 +56,14 @@ public:
   static constexpr bool is_square =
       (... && (std::tuple_size_v<typename TEquations::derivatives_t> ==
                number_of_equations));
-  /*
+
   void update(const std::array<value_type, number_of_equations> &updates) {
-    auto values_with_labels = make_tuple_of_pairs(symbols_list_t{},updates);
-    std::get<0>(equations).expression.update(updates);
-  }*/
+    auto labels = symbols_list_t{};
+    //static_assert(std::tuple_size_v<std::remove_cvref_t<decltype(labels)>> == number_of_equations);
+    std::apply([&](auto &...equations) {
+      (equations.update(labels, updates), ...);
+    }, equations);
+  }
   constexpr auto eval() const;
   constexpr auto jacobian() const -> std::enable_if_t<
       is_square,

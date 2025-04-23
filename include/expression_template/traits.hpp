@@ -353,16 +353,3 @@ constexpr static inline bool all_tuple_type_same =
     (std::is_same_v<typename Head::value_type, typename Tail::value_type> &&
      ...);
 
-
-template <typename CharTuple, typename ValueArray, std::size_t... Is>
-constexpr auto make_tuple_of_pairs_impl(const CharTuple&, const ValueArray& v, std::index_sequence<Is...>) {
-  return std::make_tuple(
-      std::make_pair(std::tuple_element_t<Is, CharTuple>::value, v[Is])...
-  );
-}
-
-template <typename... Chars, typename Values>
-constexpr auto make_tuple_of_pairs(const std::tuple<Chars...>& labels, const Values& values) {
-  static_assert(sizeof...(Chars) == std::tuple_size_v<Values>, "Mismatched sizes");
-  return make_tuple_of_pairs_impl(labels, values, std::index_sequence_for<Chars...>{});
-}

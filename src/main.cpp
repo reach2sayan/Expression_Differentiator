@@ -81,7 +81,7 @@ int main() {
   constexpr auto x1 = PV(4, 'y');                   // x = 4
   constexpr auto y2 = PV(2, 'x');                   // y = 2
   constexpr auto expr1 = x1 + y2 + PC(3) * x1 * y2; // (x + y) * (x - y)
-  constexpr auto soee = make_system_of_equations(expr1, expr2);
+  auto soee = make_system_of_equations(expr1, expr2);
   std::cout << soee << "\n";
   auto result = soee.eval();
   for (auto r : result) {
@@ -96,8 +96,8 @@ int main() {
   constexpr bool squa = soee.is_square;
   constexpr auto k = decltype(soee)::symbols_list_t{};
   constexpr std::array<int, 2> arr = {1, 2};
-  auto xhs = make_tuple_of_pairs(k,arr);
-  auto sol = NewtonRaphson(soee);
+  constexpr auto l = index_of_char_in_tuple<'y', decltype(k)>();
+  soee.update(arr);
 
   constexpr auto a1 = 4.0_vd;
   constexpr auto b2 = 2.0_cd;

@@ -56,11 +56,11 @@ public:
   constexpr auto eval() const;
   constexpr operator value_type() const { return eval(); }
   constexpr auto derivative() const;
-  /*
-  constexpr void update(const std::array<value_type, 4> &updates) {
-    inner_expressions.first.update(updates);
-    inner_expressions.second.update(updates);
-  }*/
+
+  constexpr void update(const auto& symbols, const auto &updates) {
+    inner_expressions.first.update(symbols, updates);
+    inner_expressions.second.update(symbols, updates);
+  }
 };
 
 template <typename Op, typename LHS, typename RHS>
