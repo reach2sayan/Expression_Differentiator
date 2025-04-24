@@ -23,16 +23,6 @@ if (getmdspan)
     FetchContent_MakeAvailable(mdspan)
 endif ()
 
-option(includeeigen "Include Eigen3?" ON)
-set(includeeigen ON CACHE BOOL "Include Eigen3?" FORCE)
-if(includeeigen)
-    FetchContent_Declare(Eigen3
-            GIT_REPOSITORY    https://gitlab.com/libeigen/eigen.git
-            GIT_PROGRESS	  TRUE
-    )
-    fetchcontent_makeavailable(Eigen3)
-endif ()
-
 FetchContent_Declare(
         googletest
         URL https://github.com/google/googletest/archive/5376968f6948923e2411081fd9372e71a59d8e77.zip
@@ -72,7 +62,7 @@ target_link_libraries(main PUBLIC expression_template
 )
 
 add_executable(tests tests.cpp)
-target_link_libraries(tests gtest_main expression_solver Eigen3::Eigen)
+target_link_libraries(tests gtest_main expression_solver)
 target_include_directories(tests PRIVATE
         ${CMAKE_SOURCE_DIR}/include/expression_template
         ${CMAKE_SOURCE_DIR}/include/solver

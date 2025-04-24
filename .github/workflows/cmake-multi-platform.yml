@@ -69,13 +69,6 @@ jobs:
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
           -S ${{ github.workspace }}
 
-      - name: Install Eigen3
-        uses: kupns-aka-kupa/setup-eigen3@v1
-        with:
-          version: 3.4.0
-          env:
-          CMAKE_GENERATOR: ${{ matrix.gen }}
-
       - name: Cache build
         uses: actions/cache@v3
         with:
