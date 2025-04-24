@@ -30,11 +30,7 @@ if(includeeigen)
             GIT_REPOSITORY    https://gitlab.com/libeigen/eigen.git
             GIT_PROGRESS	  TRUE
     )
-    IF(NOT eigen3_POPULATED)
-        FETCHCONTENT_POPULATE(Eigen3)
-        FETCHCONTENT_MAKEAVAILABLE(Eigen3)
-        ADD_SUBDIRECTORY(${eigen3_SOURCE_DIR} ${eigen3_BUILD_DIR})
-    ENDIF()
+    fetchcontent_makeavailable(Eigen3)
 endif ()
 
 FetchContent_Declare(

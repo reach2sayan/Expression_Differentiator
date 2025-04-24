@@ -6,7 +6,7 @@
 
 #include "soequations.hpp"
 #include <experimental/mdspan>
-#include <eigen3/Eigen/Dense>
+#include <Eigen/Dense>
 
 constexpr double EPSILON = 1e-10;
 constexpr size_t MAX_ITERATIONS = 1000;
