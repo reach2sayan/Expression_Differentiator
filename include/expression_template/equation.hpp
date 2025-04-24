@@ -83,6 +83,9 @@ public:
   constexpr void update(const auto& symbols, const auto &updates) {
     expression.update(symbols, updates);
     assert(symbolslist{} == symbols);
+        std::apply([&](auto &...equations) {
+          (equations.update(symbols, updates), ...);
+        }, derivatives);
   }
   constexpr auto eval() const { return expression.eval(); }
   constexpr auto eval_derivatives() const {

@@ -80,7 +80,7 @@ int main() {
   auto expr2 = a + b;
   auto x1 = PV(4, 'y');                   // x = 4
   auto y2 = PV(2, 'x');                   // y = 2
-  auto expr1 = x1 + y2 + PC(3) * x1 * y2; // (x + y) * (x - y)
+  auto expr1 = x1 + y2 + PC(3) * x1 * y2*y2; // (x + y) * (x - y)
   auto soee = make_system_of_equations(expr1, expr2);
   std::cout << soee << "\n";
   auto result = soee.eval();
