@@ -4,6 +4,7 @@
 
 #pragma once
 #include <string>
+#include <concepts>
 
 template <typename T> struct DivideOp;
 
@@ -11,7 +12,6 @@ constexpr bool PRINT_VARIABLE_VALUE = false;
 constexpr bool PRINT_VARIABLE_LABEL = true;
 constexpr bool PRINT_CONSTANT_VALUE = true;
 constexpr bool PRINT_CONSTANT_LABEL = false;
-#define NOASSRT true
 
 #define VALUE_TYPE_MISMATCH_ASSERT(T, U)                                       \
   static_assert(                                                               \
@@ -26,7 +26,6 @@ constexpr std::string_view letters =
 
 class character_generator {
   mutable size_t c = 0;
-
 public:
   constexpr char operator()() const { return letters[++c % 52]; }
 };
@@ -58,9 +57,6 @@ struct IOperators {
   friend constexpr auto operator-(const LHS &a, const RHS &b);
 
   template <typename LHS, typename RHS>
-  friend constexpr auto operator^(const LHS &a, const RHS &b);
-
-  template <typename LHS, typename RHS>
   friend constexpr Expression<DivideOp<typename LHS::value_type>, LHS, RHS>
   operator/(const LHS &a, const RHS &b);
 
@@ -76,6 +72,13 @@ struct IOperators {
   cos(const Expr &a) {
     using value_type = typename Expr::value_type;
     return Cosine<value_type>(a);
+  }
+
+  template <typename Expr>
+  friend constexpr MonoExpression<ExpOp<typename Expr::value_type>, Expr>
+  exp(const Expr &a) {
+    using value_type = typename Expr::value_type;
+    return Exp<value_type>(a);
   }
 };
 
@@ -180,13 +183,6 @@ operator/(const LHS &a, const RHS &b) {
   VALUE_TYPE_MISMATCH_ASSERT(LHS, RHS);
   using value_type = typename LHS::value_type;
   return Divide<value_type>(a, b);
-}
-
-template <ExpressionConcept LHS, ExpressionConcept RHS>
-constexpr auto operator^(const LHS &a, const RHS &b) {
-  VALUE_TYPE_MISMATCH_ASSERT(LHS, RHS);
-  using value_type = typename LHS::value_type;
-  return Exp<value_type>(a, b);
 }
 
 #define PV(x, label) Variable<decltype(x), label>(x)

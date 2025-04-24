@@ -6,7 +6,6 @@
 
 #include "soequations.hpp"
 #include <experimental/mdspan>
-// #define EIGEN_NO_DEBUG
 #include <Eigen/Dense>
 
 constexpr double EPSILON = 1e-10;

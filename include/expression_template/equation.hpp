@@ -7,6 +7,7 @@
 #include "operations.hpp"
 #include "traits.hpp"
 #include <cassert>
+#include <concepts>
 
 template <class... T>
 constexpr inline std::ostream &print_tup(std::ostream &out,
