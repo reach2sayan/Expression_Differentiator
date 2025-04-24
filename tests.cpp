@@ -86,7 +86,7 @@ TEST(ExpressionTest, ExpDerivative) {
 }
 
 TEST(ExpressionTest, Combination) {
-  constexpr double target = Sum<double>(Exp<double>(Sum<int>(1, Sum<int>(2, 3))), 1);
+  double target = Sum<double>(Exp<double>(Sum<int>(1, Sum<int>(2, 3))), 1);
   ASSERT_EQ(target, std::exp(6.0)+1.0);
 }
 
