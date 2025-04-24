@@ -69,6 +69,7 @@ public:
   constexpr auto jacobian() const
     requires(!is_square)
   {
+    static_assert(false, "jacobian is not defined for non-square systems");
     std::unreachable();
   }
   constexpr auto eval() const;
