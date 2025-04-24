@@ -6,7 +6,7 @@
 
 #include "soequations.hpp"
 #include <experimental/mdspan>
-//#define EIGEN_NO_DEBUG
+// #define EIGEN_NO_DEBUG
 #include <Eigen/Dense>
 
 constexpr double EPSILON = 1e-10;
@@ -27,6 +27,4 @@ public:
 };
 template <typename... TEquations> void NewtonRaphson<TEquations...>::solve() {
   auto jac = soe.jacobian();
-
 }
-

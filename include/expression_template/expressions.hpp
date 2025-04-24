@@ -27,6 +27,8 @@ struct is_expression_type<Constant<T>> : std::true_type {};
 template<typename Op, typename LHS, typename RHS>
 struct is_expression_type<Expression<Op, LHS, RHS>> : std::true_type {};
 
+template<typename Op, typename LHS>
+struct is_expression_type<MonoExpression<Op, LHS>> : std::true_type {};
 
 template <typename Op> class BaseExpression {
 public:

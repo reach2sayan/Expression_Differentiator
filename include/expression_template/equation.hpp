@@ -39,7 +39,10 @@ constexpr auto make_derivatives(const std::tuple<Chars...> &labels,
                                std::index_sequence_for<Chars...>{});
 }
 
-template <typename TExpression> class Equation {
+template <typename T>
+concept EquationConcept = ExpressionConcept<T> and std::constructible_from<T>;
+
+template <ExpressionConcept TExpression> class Equation {
 private:
   TExpression expression;
 
@@ -102,4 +105,4 @@ public:
       : expression{e}, derivatives{make_derivatives(symbolslist{}, e)} {}
 };
 
-template <typename T> Equation(T &&) -> Equation<std::decay_t<T>>;
+template <ExpressionConcept T> Equation(T &&) -> Equation<std::decay_t<T>>;
