@@ -1,5 +1,6 @@
 #include "dual.hpp"
 #include "equation.hpp"
+#include "gradient.hpp"
 #include "operations.hpp"
 #include "traits.hpp"
 #include "values.hpp"
@@ -636,4 +637,125 @@ TEST(ForwardModeAD, Equivalence) {
   EXPECT_DOUBLE_EQ(df, 2.0 * x0 * std::cos(x0 * x0));
   EXPECT_DOUBLE_EQ(df, df2);
   EXPECT_DOUBLE_EQ(f, f2);
+}
+
+// ===========================================================================
+// Reverse-mode automatic differentiation via backward() / gradient()
+// ===========================================================================
+
+TEST(ReverseModeAD, SingleVariableLinear) {
+  // f(x) = 3*x  at x=5,  df/dx = 3
+  auto x = PV(5.0, 'x');
+  auto expr = PC(3.0) * x;
+  auto g = gradient(expr);
+  EXPECT_DOUBLE_EQ(g[0], 3.0);
+}
+
+TEST(ReverseModeAD, ProductRule) {
+  // f(x) = x*x  at x=4,  df/dx = 2x = 8
+  auto x = Variable<double, 'x'>{4.0};
+  auto expr = x * x;
+  auto g = gradient(expr);
+  EXPECT_DOUBLE_EQ(g[0], 8.0);
+}
+
+TEST(ReverseModeAD, TwoVariables) {
+  // f(x,y) = x*y  at (3,4),  df/dx=4, df/dy=3
+  auto x = PV(3.0, 'x');
+  auto y = PV(4.0, 'y');
+  auto expr = x * y;
+  auto g = gradient(expr);
+  static_assert(g.size() == 2);
+  EXPECT_DOUBLE_EQ(g[0], 4.0);  // df/dx = y
+  EXPECT_DOUBLE_EQ(g[1], 3.0);  // df/dy = x
+}
+
+TEST(ReverseModeAD, Sum) {
+  // f(x,y) = x + y,  df/dx=1, df/dy=1
+  auto x = PV(2.0, 'x');
+  auto y = PV(5.0, 'y');
+  auto g = gradient(x + y);
+  EXPECT_DOUBLE_EQ(g[0], 1.0);
+  EXPECT_DOUBLE_EQ(g[1], 1.0);
+}
+
+TEST(ReverseModeAD, LinearCombination) {
+  // f(x,y) = 2*x + 3*y,  df/dx=2, df/dy=3
+  auto x = PV(1.0, 'x');
+  auto y = PV(1.0, 'y');
+  auto g = gradient(PC(2.0) * x + PC(3.0) * y);
+  EXPECT_DOUBLE_EQ(g[0], 2.0);
+  EXPECT_DOUBLE_EQ(g[1], 3.0);
+}
+
+TEST(ReverseModeAD, Divide) {
+  // f(x) = x/c at x=6, c=3,  df/dx = 1/c = 1/3
+  auto x = PV(6.0, 'x');
+  auto c = PC(3.0);
+  auto g = gradient(x / c);
+  EXPECT_DOUBLE_EQ(g[0], 1.0 / 3.0);
+}
+
+TEST(ReverseModeAD, NegateViaSubtract) {
+  // f(x,y) = x - y,  df/dx=1, df/dy=-1
+  auto x = PV(5.0, 'x');
+  auto y = PV(2.0, 'y');
+  auto g = gradient(x - y);
+  EXPECT_DOUBLE_EQ(g[0],  1.0);
+  EXPECT_DOUBLE_EQ(g[1], -1.0);
+}
+
+TEST(ReverseModeAD, SinDerivative) {
+  // f(x) = sin(x),  df/dx = cos(x)  at x=1
+  auto x = PV(1.0, 'x');
+  auto g = gradient(sin(x));
+  EXPECT_DOUBLE_EQ(g[0], std::cos(1.0));
+}
+
+TEST(ReverseModeAD, CosDerivative) {
+  // f(x) = cos(x),  df/dx = -sin(x)  at x=1
+  auto x = PV(1.0, 'x');
+  auto g = gradient(cos(x));
+  EXPECT_DOUBLE_EQ(g[0], -std::sin(1.0));
+}
+
+TEST(ReverseModeAD, ExpDerivative) {
+  // f(x) = exp(x),  df/dx = exp(x)  at x=2
+  auto x = PV(2.0, 'x');
+  auto g = gradient(exp(x));
+  EXPECT_DOUBLE_EQ(g[0], std::exp(2.0));
+}
+
+TEST(ReverseModeAD, ChainRuleSinOfProduct) {
+  // f(x,y) = sin(x*y)  at (2,3)
+  // df/dx = cos(x*y)*y = cos(6)*3
+  // df/dy = cos(x*y)*x = cos(6)*2
+  auto x = PV(2.0, 'x');
+  auto y = PV(3.0, 'y');
+  auto g = gradient(sin(x * y));
+  EXPECT_DOUBLE_EQ(g[0], std::cos(6.0) * 3.0);
+  EXPECT_DOUBLE_EQ(g[1], std::cos(6.0) * 2.0);
+}
+
+TEST(ReverseModeAD, ThreeVariables) {
+  // f(x,y,z) = x*y + y*z  at (2,3,4)
+  // df/dx=y=3, df/dy=x+z=6, df/dz=y=3
+  auto x = PV(2.0, 'x');
+  auto y = PV(3.0, 'y');
+  auto z = PV(4.0, 'z');
+  auto g = gradient(x * y + y * z);
+  EXPECT_DOUBLE_EQ(g[0], 3.0);
+  EXPECT_DOUBLE_EQ(g[1], 6.0);
+  EXPECT_DOUBLE_EQ(g[2], 3.0);
+}
+
+TEST(ReverseModeAD, AgreesWithForwardMode) {
+  // f(x,y) = exp(x) * sin(y)  at (1, pi/4)
+  // df/dx = exp(x)*sin(y), df/dy = exp(x)*cos(y)
+  double xv = 1.0, yv = std::numbers::pi / 4.0;
+  auto x = PV(xv, 'x');
+  auto y = PV(yv, 'y');
+  auto g = gradient(exp(x) * sin(y));
+  EXPECT_DOUBLE_EQ(g[0], std::exp(xv) * std::sin(yv));
+  EXPECT_DOUBLE_EQ(g[1], std::exp(xv) * std::cos(yv));
 }

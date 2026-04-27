@@ -104,6 +104,7 @@ public:
   constexpr operator T() const { return value; }
   [[nodiscard]] constexpr auto derivative() const { return Constant{T{}}; }
   constexpr void update(...) const {}
+  constexpr void backward(const auto &, T, auto &) const {} // constant: no variable to accumulate to
 
   template <std::size_t I>
   [[nodiscard]] constexpr auto get() const {
@@ -138,6 +139,7 @@ public:
   template <typename U> constexpr decltype(auto) operator=(U &&v);
   constexpr void update(const auto &symbols, const auto &updates);
   [[nodiscard]] constexpr auto derivative() const;
+  constexpr void backward(const auto &syms, T adj, auto &grads) const;
 
   template <std::size_t I>
   [[nodiscard]] constexpr auto get() const {
@@ -175,6 +177,14 @@ template <Numeric T, char symbol>
 constexpr auto Variable<T, symbol>::derivative() const {
   auto ret = T{};
   return Constant{++ret};
+}
+
+template <Numeric T, char symbol>
+constexpr void Variable<T, symbol>::backward(const auto &syms, T adj,
+                                             auto &grads) const {
+  using Syms = std::decay_t<decltype(syms)>;
+  constexpr auto idx = index_of_char_in_hana<symbol, Syms>();
+  grads[idx] += adj;
 }
 
 #define PV(x, label) Variable<decltype(x), label>(x)
