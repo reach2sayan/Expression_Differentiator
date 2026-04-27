@@ -84,6 +84,50 @@ struct IOperators {
     using value_type = typename Expr::value_type;
     return MonoExpression<ExpOp<value_type>, Expr>{std::move(a)};
   }
+
+  // Scalar-on-left overloads: wrap the scalar as Constant<VT> and delegate.
+  template <Numeric S, ExpressionConcept RHS>
+  friend constexpr auto operator+(S s, const RHS &b) {
+    using VT = typename RHS::value_type;
+    return Constant<VT>{static_cast<VT>(s)} + b;
+  }
+  template <Numeric S, ExpressionConcept RHS>
+  friend constexpr auto operator*(S s, const RHS &b) {
+    using VT = typename RHS::value_type;
+    return Constant<VT>{static_cast<VT>(s)} * b;
+  }
+  template <Numeric S, ExpressionConcept RHS>
+  friend constexpr auto operator-(S s, const RHS &b) {
+    using VT = typename RHS::value_type;
+    return Constant<VT>{static_cast<VT>(s)} - b;
+  }
+  template <Numeric S, ExpressionConcept RHS>
+  friend constexpr auto operator/(S s, const RHS &b) {
+    using VT = typename RHS::value_type;
+    return Constant<VT>{static_cast<VT>(s)} / b;
+  }
+
+  // Scalar-on-right overloads.
+  template <ExpressionConcept LHS, Numeric S>
+  friend constexpr auto operator+(const LHS &a, S s) {
+    using VT = typename LHS::value_type;
+    return a + Constant<VT>{static_cast<VT>(s)};
+  }
+  template <ExpressionConcept LHS, Numeric S>
+  friend constexpr auto operator*(const LHS &a, S s) {
+    using VT = typename LHS::value_type;
+    return a * Constant<VT>{static_cast<VT>(s)};
+  }
+  template <ExpressionConcept LHS, Numeric S>
+  friend constexpr auto operator-(const LHS &a, S s) {
+    using VT = typename LHS::value_type;
+    return a - Constant<VT>{static_cast<VT>(s)};
+  }
+  template <ExpressionConcept LHS, Numeric S>
+  friend constexpr auto operator/(const LHS &a, S s) {
+    using VT = typename LHS::value_type;
+    return a / Constant<VT>{static_cast<VT>(s)};
+  }
 };
 
 template <Numeric T> class Constant : public IOperators {

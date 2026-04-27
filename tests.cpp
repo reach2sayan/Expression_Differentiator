@@ -817,6 +817,24 @@ TEST(VectorEquationForward, StateRestoredAfterCall) {
   EXPECT_DOUBLE_EQ(vals[1].template get<0>(),  7.0);  // x+y = 7
 }
 
+TEST(ReverseModeAD, ScalarLiteralCoercion) {
+  // gradient(3*x*y + y*z) with plain integer/double literals
+  auto x = PV(2.0, 'x');
+  auto y = PV(3.0, 'y');
+  auto z = PV(4.0, 'z');
+  auto g = gradient(3.0 * x * y + y * z);
+  EXPECT_DOUBLE_EQ(g[0], 9.0);   // df/dx = 3*y = 9
+  EXPECT_DOUBLE_EQ(g[1], 10.0);  // df/dy = 3*x + z = 10
+  EXPECT_DOUBLE_EQ(g[2], 3.0);   // df/dz = y = 3
+}
+
+TEST(ReverseModeAD, ScalarOnRight) {
+  // expr * scalar and expr + scalar
+  auto x = PV(5.0, 'x');
+  auto g = gradient(x * 4.0 + 1.0);
+  EXPECT_DOUBLE_EQ(g[0], 4.0);   // df/dx = 4
+}
+
 TEST(ReverseModeAD, AgreesWithForwardMode) {
   // f(x,y) = exp(x) * sin(y)  at (1, pi/4)
   // df/dx = exp(x)*sin(y), df/dy = exp(x)*cos(y)
