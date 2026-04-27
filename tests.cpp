@@ -616,7 +616,24 @@ TEST(ForwardModeAD, ChainRule) {
   // f(x) = sin(x^2),  f'(x) = 2x*cos(x^2)
   double x0 = 1.0;
   Variable<Dual<double>, 'x'> x{Dual<double>{x0, 1.0}};
-  auto [f, df] = sin(x * x).eval();
+  auto l = sin(x*x);
+  auto [f, df] = sin(x * x);
   EXPECT_DOUBLE_EQ(f,  std::sin(x0 * x0));
   EXPECT_DOUBLE_EQ(df, 2.0 * x0 * std::cos(x0 * x0));
+}
+
+TEST(ForwardModeAD, Equivalence) {
+  // f(x) = sin(x^2),  f'(x) = 2x*cos(x^2)
+  double x0 = 1.0;
+  Variable<Dual<double>, 'x'> x{Dual<double>{x0, 1.0}};
+  double x0v = 1.0;
+  auto xv = PV(x0, 'x');
+  auto l = sin(xv*xv);
+  auto [f, df] = sin(x * x);
+  auto f2 = l.eval();
+  auto df2 = l.derivative().eval();
+  EXPECT_DOUBLE_EQ(f,  std::sin(x0 * x0));
+  EXPECT_DOUBLE_EQ(df, 2.0 * x0 * std::cos(x0 * x0));
+  EXPECT_DOUBLE_EQ(df, df2);
+  EXPECT_DOUBLE_EQ(f, f2);
 }
