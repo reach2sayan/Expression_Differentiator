@@ -810,7 +810,7 @@ TEST(VectorEquationForward, StateRestoredAfterCall) {
   Variable<D, 'x'> x{D{3.0}};
   Variable<D, 'y'> y{D{4.0}};
   auto ve = VectorEquation(x * y, x + y);
-  ve.eval_jacobian_forward({3.0, 4.0});
+  auto jac = ve.eval_jacobian_forward({3.0, 4.0});
   auto vals = ve.eval();
   EXPECT_DOUBLE_EQ(vals[0].template get<0>(), 12.0);  // x*y = 12
   EXPECT_DOUBLE_EQ(vals[0].template get<1>(),  0.0);  // dual part zeroed
