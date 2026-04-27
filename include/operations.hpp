@@ -93,14 +93,14 @@ template <typename T> struct DivideOp : BinaryOp<T, std::divides<T>, '/'> {
 
 template <typename T>
 struct SineOp
-    : UnaryOp<T, decltype([](const T &a) -> T { return std::sin(a); }), '$'> {
+    : UnaryOp<T, decltype([](const T &a) -> T { using std::sin; return sin(a); }), '$'> {
   template <typename Expr>
   [[nodiscard]] constexpr static auto derivative(const Expr &lhs);
 };
 
 template <typename T>
 struct CosineOp
-    : UnaryOp<T, decltype([](const T &a) -> T { return std::cos(a); }), '['> {
+    : UnaryOp<T, decltype([](const T &a) -> T { using std::cos; return cos(a); }), '['> {
   template <typename Expr>
   [[nodiscard]] constexpr static auto derivative(const Expr &lhs);
 };
@@ -119,7 +119,7 @@ constexpr auto SineOp<T>::derivative(const Expr &expr) {
 
 template <typename T>
 struct ExpOp
-    : UnaryOp<T, decltype([](const T &a) -> T { return std::exp(a); }), 'e'> {
+    : UnaryOp<T, decltype([](const T &a) -> T { using std::exp; return exp(a); }), 'e'> {
   template <typename Expr>
   [[nodiscard]] constexpr static auto derivative(const Expr &lhs) {
     return MonoExpression<ExpOp<T>, Expr>{lhs} * lhs.derivative();

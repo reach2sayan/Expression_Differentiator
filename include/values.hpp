@@ -104,6 +104,17 @@ public:
   constexpr operator T() const { return value; }
   [[nodiscard]] constexpr auto derivative() const { return Constant{T{}}; }
   constexpr void update(...) const {}
+
+  template <std::size_t I>
+  [[nodiscard]] constexpr auto get() const {
+    static_assert(I < 2);
+    if constexpr (requires { std::tuple_size<T>::value; })
+      return eval().template get<I>();
+    else if constexpr (I == 0)
+      return eval();
+    else
+      return static_cast<T>(derivative());
+  }
 };
 
 template <Numeric T, char symbol> class Variable : public IOperators {
@@ -127,6 +138,17 @@ public:
   template <typename U> constexpr decltype(auto) operator=(U &&v);
   constexpr void update(const auto &symbols, const auto &updates);
   [[nodiscard]] constexpr auto derivative() const;
+
+  template <std::size_t I>
+  [[nodiscard]] constexpr auto get() const {
+    static_assert(I < 2);
+    if constexpr (requires { std::tuple_size<T>::value; })
+      return eval().template get<I>();
+    else if constexpr (I == 0)
+      return eval();
+    else
+      return static_cast<T>(derivative());
+  }
 };
 
 template <Numeric T, char symbol>
@@ -178,3 +200,19 @@ DEFINE_CONST_UDL(int, ci)
 DEFINE_CONST_UDL(double, cd)
 DEFINE_VAR_UDL(int, vi, 'c')
 DEFINE_VAR_UDL(double, vd, 'v')
+
+template <Numeric T>
+struct std::tuple_size<Constant<T>> : std::integral_constant<std::size_t, 2> {};
+
+template <std::size_t I, Numeric T>
+struct std::tuple_element<I, Constant<T>> {
+  using type = typename expression_element<T, I>::type;
+};
+
+template <Numeric T, char C>
+struct std::tuple_size<Variable<T, C>> : std::integral_constant<std::size_t, 2> {};
+
+template <std::size_t I, Numeric T, char C>
+struct std::tuple_element<I, Variable<T, C>> {
+  using type = typename expression_element<T, I>::type;
+};

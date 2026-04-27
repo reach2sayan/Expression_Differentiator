@@ -1,3 +1,4 @@
+#include "dual.hpp"
 #include "equation.hpp"
 #include "operations.hpp"
 #include "traits.hpp"
@@ -504,4 +505,118 @@ TEST(VectorEquationTest, ThreeOutputs) {
   ASSERT_DOUBLE_EQ(J[1][1], 2.0);   // x
   ASSERT_DOUBLE_EQ(J[2][0], 0.0);   // 0
   ASSERT_DOUBLE_EQ(J[2][1], 10.0);  // 2y
+}
+
+// ===========================================================================
+// Forward-mode automatic differentiation via dual numbers
+// ===========================================================================
+
+TEST(ForwardModeAD, ExpressionStructuredBinding) {
+  // Non-Dual: auto [f, df] = expr gives {eval(), derivative().eval()}
+  auto x = PV(3.0, 'x');
+  auto [f, df] = x * x;                 // f=9, df=2*3=6
+  EXPECT_DOUBLE_EQ(f,  9.0);
+  EXPECT_DOUBLE_EQ(df, 6.0);
+
+  auto [g, dg] = sin(PV(0.0, 'x'));     // g=sin(0)=0, dg=cos(0)*1=1
+  EXPECT_DOUBLE_EQ(g,  0.0);
+  EXPECT_DOUBLE_EQ(dg, 1.0);
+}
+
+TEST(ForwardModeAD, DualNumericConcept) {
+  static_assert(Numeric<Dual<double>>);
+  static_assert(Numeric<Dual<float>>);
+}
+
+TEST(ForwardModeAD, StructuredBinding) {
+  Dual<double> d{3.0, 7.0};
+  auto [v, dv] = d;
+  EXPECT_DOUBLE_EQ(v,  3.0);
+  EXPECT_DOUBLE_EQ(dv, 7.0);
+  static_assert(std::tuple_size_v<Dual<double>> == 2);
+  static_assert(std::is_same_v<std::tuple_element_t<0, Dual<double>>, double>);
+  static_assert(std::is_same_v<std::tuple_element_t<1, Dual<double>>, double>);
+}
+
+TEST(ForwardModeAD, BasicArithmetic) {
+  // Verify dual number arithmetic rules directly.
+  constexpr Dual<double> a{3.0, 1.0};
+  constexpr Dual<double> b{2.0, 0.0};
+  auto [sum_val, sum_deriv] = a + b;
+  EXPECT_DOUBLE_EQ(sum_val,   5.0);
+  EXPECT_DOUBLE_EQ(sum_deriv, 1.0);
+  auto [prod_val, prod_deriv] = a * b;
+  EXPECT_DOUBLE_EQ(prod_val,   6.0);
+  EXPECT_DOUBLE_EQ(prod_deriv, 2.0);  // 1*2 + 3*0 = 2
+  auto [quot_val, quot_deriv] = a / b;
+  EXPECT_DOUBLE_EQ(quot_val,   1.5);
+  EXPECT_DOUBLE_EQ(quot_deriv, 0.5);  // (1*2 - 3*0)/4 = 0.5
+}
+
+TEST(ForwardModeAD, PolynomialDerivative) {
+  // f(x) = x^2 + x,  f'(x) = 2x + 1
+  // At x=3: f=12, f'=7
+  Variable<Dual<double>, 'x'> x{Dual<double>{3.0, 1.0}};
+  auto [f, df] = (x * x + x).eval();
+  EXPECT_DOUBLE_EQ(f,  12.0);
+  EXPECT_DOUBLE_EQ(df,  7.0);
+}
+
+TEST(ForwardModeAD, PartialDerivativeX) {
+  // f(x,y) = x*y,  df/dx = y
+  // At (3,4): f=12, df/dx=4
+  Variable<Dual<double>, 'x'> x{Dual<double>{3.0, 1.0}};
+  Variable<Dual<double>, 'y'> y{Dual<double>{4.0, 0.0}};
+  auto [f, df] = (x * y).eval();
+  EXPECT_DOUBLE_EQ(f,  12.0);
+  EXPECT_DOUBLE_EQ(df,  4.0);
+}
+
+TEST(ForwardModeAD, PartialDerivativeY) {
+  // f(x,y) = x*y,  df/dy = x
+  // At (3,4): f=12, df/dy=3
+  Variable<Dual<double>, 'x'> x{Dual<double>{3.0, 0.0}};
+  Variable<Dual<double>, 'y'> y{Dual<double>{4.0, 1.0}};
+  auto [f, df] = (x * y).eval();
+  EXPECT_DOUBLE_EQ(f,  12.0);
+  EXPECT_DOUBLE_EQ(df,  3.0);
+}
+
+TEST(ForwardModeAD, SinDerivative) {
+  // f(x) = sin(x),  f'(x) = cos(x)
+  double x0 = std::numbers::pi / 4.0;
+  Variable<Dual<double>, 'x'> x{Dual<double>{x0, 1.0}};
+  auto [f, df] = sin(x).eval();
+  EXPECT_DOUBLE_EQ(f,  std::sin(x0));
+  EXPECT_DOUBLE_EQ(df, std::cos(x0));
+}
+
+TEST(ForwardModeAD, CosDerivative) {
+  // f(x) = cos(x),  f'(x) = -sin(x)
+  double x0 = std::numbers::pi / 3.0;
+  Variable<Dual<double>, 'x'> x{Dual<double>{x0, 1.0}};
+  auto [f, df] = cos(x).eval();
+  EXPECT_DOUBLE_EQ(f,   std::cos(x0));
+  EXPECT_DOUBLE_EQ(df, -std::sin(x0));
+}
+
+TEST(ForwardModeAD, ExpDerivative) {
+  // f(x) = exp(x),  f'(x) = exp(x)
+  double x0 = 2.0;
+  Variable<Dual<double>, 'x'> x{Dual<double>{x0, 1.0}};
+  auto [f, df] = exp(x).eval();
+  auto [f2, df2] = exp(x);
+  EXPECT_DOUBLE_EQ(f,  std::exp(x0));
+  EXPECT_DOUBLE_EQ(df, std::exp(x0));
+  EXPECT_DOUBLE_EQ(f,  f2);
+  EXPECT_DOUBLE_EQ(df, df2);
+}
+
+TEST(ForwardModeAD, ChainRule) {
+  // f(x) = sin(x^2),  f'(x) = 2x*cos(x^2)
+  double x0 = 1.0;
+  Variable<Dual<double>, 'x'> x{Dual<double>{x0, 1.0}};
+  auto [f, df] = sin(x * x).eval();
+  EXPECT_DOUBLE_EQ(f,  std::sin(x0 * x0));
+  EXPECT_DOUBLE_EQ(df, 2.0 * x0 * std::cos(x0 * x0));
 }
