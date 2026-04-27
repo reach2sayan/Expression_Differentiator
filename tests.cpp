@@ -749,6 +749,74 @@ TEST(ReverseModeAD, ThreeVariables) {
   EXPECT_DOUBLE_EQ(g[2], 3.0);
 }
 
+// ===========================================================================
+// VectorEquation — forward-mode Jacobian via dual numbers
+// ===========================================================================
+
+TEST(VectorEquationForward, TwoVariables) {
+  // f(x,y) = (x*y, x+y)  at (3,4)
+  // J = [[y, x], [1, 1]] = [[4, 3], [1, 1]]
+  using D = Dual<double>;
+  Variable<D, 'x'> x{D{3.0}};
+  Variable<D, 'y'> y{D{4.0}};
+  auto ve = VectorEquation(x * y, x + y);
+  auto J = ve.eval_jacobian_forward({3.0, 4.0});
+  EXPECT_DOUBLE_EQ(J[0][0], 4.0);  // ∂(x*y)/∂x = y = 4
+  EXPECT_DOUBLE_EQ(J[0][1], 3.0);  // ∂(x*y)/∂y = x = 3
+  EXPECT_DOUBLE_EQ(J[1][0], 1.0);  // ∂(x+y)/∂x
+  EXPECT_DOUBLE_EQ(J[1][1], 1.0);  // ∂(x+y)/∂y
+}
+
+TEST(VectorEquationForward, AgreesWithSymbolic) {
+  // Build the same VectorEquation two ways and compare Jacobians.
+  double xv = 2.0, yv = 3.0;
+
+  // Symbolic path
+  auto xs = PV(xv, 'x');
+  auto ys = PV(yv, 'y');
+  auto ve_sym = VectorEquation(xs * xs, xs * ys, ys * ys);
+  auto J_sym = ve_sym.eval_jacobian();
+
+  // Forward-mode path
+  using D = Dual<double>;
+  Variable<D, 'x'> xd{D{xv}};
+  Variable<D, 'y'> yd{D{yv}};
+  auto ve_fwd = VectorEquation(xd * xd, xd * yd, yd * yd);
+  auto J_fwd = ve_fwd.eval_jacobian_forward({xv, yv});
+
+  for (std::size_t i = 0; i < 3; ++i)
+    for (std::size_t j = 0; j < 2; ++j)
+      EXPECT_DOUBLE_EQ(J_fwd[i][j], J_sym[i][j]);
+}
+
+TEST(VectorEquationForward, TrigJacobian) {
+  // f(x,y) = (x*y, sin(x) + y*y)  at (2, 3) — same as VectorEquationTest
+  // J = [[y, x], [cos(x), 2y]] = [[3, 2], [cos(2), 6]]
+  using D = Dual<double>;
+  Variable<D, 'x'> x{D{2.0}};
+  Variable<D, 'y'> y{D{3.0}};
+  auto ve = VectorEquation(x * y, sin(x) + y * y);
+  auto J = ve.eval_jacobian_forward({2.0, 3.0});
+  EXPECT_DOUBLE_EQ(J[0][0], 3.0);
+  EXPECT_DOUBLE_EQ(J[0][1], 2.0);
+  EXPECT_DOUBLE_EQ(J[1][0], std::cos(2.0));
+  EXPECT_DOUBLE_EQ(J[1][1], 6.0);
+}
+
+TEST(VectorEquationForward, StateRestoredAfterCall) {
+  // After eval_jacobian_forward the expressions should evaluate at the
+  // original point (dual parts zeroed out).
+  using D = Dual<double>;
+  Variable<D, 'x'> x{D{3.0}};
+  Variable<D, 'y'> y{D{4.0}};
+  auto ve = VectorEquation(x * y, x + y);
+  ve.eval_jacobian_forward({3.0, 4.0});
+  auto vals = ve.eval();
+  EXPECT_DOUBLE_EQ(vals[0].template get<0>(), 12.0);  // x*y = 12
+  EXPECT_DOUBLE_EQ(vals[0].template get<1>(),  0.0);  // dual part zeroed
+  EXPECT_DOUBLE_EQ(vals[1].template get<0>(),  7.0);  // x+y = 7
+}
+
 TEST(ReverseModeAD, AgreesWithForwardMode) {
   // f(x,y) = exp(x) * sin(y)  at (1, pi/4)
   // df/dx = exp(x)*sin(y), df/dy = exp(x)*cos(y)
